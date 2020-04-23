@@ -1,3 +1,12 @@
+# Our Specific files to ignore
+data/ADE20K_2016_07_26/
+*.png
+*.jpg
+
+
+
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
