@@ -1,9 +1,9 @@
 from spadelayer import SpadeLayer
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras.layers import Conv2D, BatchNormalization, LeakyReLU, Model
+from tensorflow.keras.layers import Conv2D, BatchNormalization, LeakyReLU, Layer
 
-class SpadeBlock(Model): 
+class SpadeBlock(Layer): 
 	def __init__(self, fin, fout, use_bias=True, use_spectral=False): 
 		super(SpadeBlock, self).__init__()
 		self.use_spectral = use_spectral 
