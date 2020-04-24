@@ -1,6 +1,7 @@
 from spadelayer import SpadeLayer
 import tensorflow as tf
 from tensorflow import keras
+import numpy as np
 from tensorflow.keras.layers import Conv2D, BatchNormalization, LeakyReLU, Layer
 
 class SpadeBlock(Layer): 
@@ -42,7 +43,8 @@ class SpadeBlock(Layer):
 		return x_s
 	
 	def actvn(self, x): 
-		return LeakyReLU(x, alpha=0.2)
+		layer = LeakyReLU(alpha=0.2)
+		return layer(x)
 
 	"""
 	This spectral_norm implementation was taken from https://github.com/taki0112/Spectral_Normalization-Tensorflow
@@ -77,5 +79,3 @@ class SpadeBlock(Layer):
 
 
 		return w_norm
-
-
