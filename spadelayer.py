@@ -18,7 +18,7 @@ class SpadeLayer(Layer):
 		segmap_resized = tf.image.resize(segmap, size=(x_h, x_w), method="nearest")
 
 		seg_result = self.relu(self.conv1(segmap_resized))
-		result_a = 	self.conv2(seg_result)
+		result_a = self.conv2(seg_result)
 		result_b = self.conv3(seg_result)
 
 		return norm * (1 + result_a) + result_b
