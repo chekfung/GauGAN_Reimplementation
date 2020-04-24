@@ -23,9 +23,9 @@ class SpadeBlock(Model):
 
 	def call(self, features, segmap): 
 		if self.use_spectral: 
-			skip_features = self.spectral_norm(self.shortcut(features, segmap))
-			dx = self.spectral_norm(self.conv0(self.actvn(self.spade0(features, segmap))))
-			dx = self.spectral_norm(self.conv1(self.actvn(self.spade1(dx, segmap))))
+			skip_features = self.spectral_norm(w=self.shortcut(features, segmap))
+			dx = self.spectral_norm(w=self.conv0(self.actvn(self.spade0(features, segmap))))
+			dx = self.spectral_norm(w=self.conv1(self.actvn(self.spade1(dx, segmap))))
 			out = skip_features + dx
 		else: 
 			skip_features = self.shortcut(features, segmap)
