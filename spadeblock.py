@@ -21,24 +21,24 @@ class SpadeBlock(Layer):
 		if self.learned_shortcut: 
 			self.spade_s = SpadeLayer(out_channels=fin)
 
-	def call(self, features, segmap): 
+	def call(self, inputs, segmap): 
 		if self.use_spectral: 
-			skip_features = self.spectral_norm(w=self.shortcut(features, segmap))
-			dx = self.spectral_norm(w=self.conv0(self.actvn(self.spade0(features, segmap))))
+			skip_features = self.spectral_norm(w=self.shortcut(inputs, segmap))
+			dx = self.spectral_norm(w=self.conv0(self.actvn(self.spade0(inputs, segmap))))
 			dx = self.spectral_norm(w=self.conv1(self.actvn(self.spade1(dx, segmap))))
 			out = skip_features + dx
 		else: 
-			skip_features = self.shortcut(features, segmap)
-			dx = self.conv0(self.actvn(self.spade0(features, segmap)))
+			skip_features = self.shortcut(inputs, segmap)
+			dx = self.conv0(self.actvn(self.spade0(inputs, segmap)))
 			dx = self.conv1(self.actvn(self.spade1(dx, segmap)))
 			out = skip_features + dx
 		return out
 	
-	def shortcut(self, features, segmap): 
+	def shortcut(self, inputs, segmap): 
 		if self.learned_shortcut: 
-			x_s = self.conv_s(self.spade_s(features, segmap))
+			x_s = self.conv_s(self.spade_s(inputs, segmap))
 		else: 
-			x_s = features
+			x_s = inputs
 		return x_s
 	
 	def actvn(self, x): 
