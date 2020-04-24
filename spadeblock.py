@@ -11,10 +11,10 @@ class SpadeBlock(Model):
 		self.learned_shortcut = (fin != fout)
 		fmiddle = min(fin, fout)
 
-		self.conv0 = Conv2D(filters=fmiddle, kernel_size=3, strides=1, padding="SAME", use_bias=use_bias, use_spectral=use_spectral)
-		self.conv1 = Conv2D(filters=fout, kernel_size=3, strides=1, padding="SAME", use_bias=use_bias, use_spectral=use_spectral)
+		self.conv0 = Conv2D(filters=fmiddle, kernel_size=3, strides=1, padding="SAME", use_bias=use_bias)
+		self.conv1 = Conv2D(filters=fout, kernel_size=3, strides=1, padding="SAME", use_bias=use_bias)
 		if self.learned_shortcut: 
-			self.conv_s = Conv2D(filters=fout, kernel_size=1, strides=1, padding="SAME", use_bias=False, use_spectral=use_spectral)
+			self.conv_s = Conv2D(filters=fout, kernel_size=1, strides=1, padding="SAME", use_bias=False)
 		
 		self.spade0 = SpadeLayer(out_channels=fin)
 		self.spade1 = SpadeLayer(out_channels=fmiddle)
