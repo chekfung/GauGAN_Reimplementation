@@ -9,6 +9,7 @@ from tensorflow_addons.layers import InstanceNormalization
 
 class Discriminator(Model):
     def __init__(self):
+        super(Discriminator, self).__init__()
         # Padding, Stride, etc calculations
         KERNEL_SIZE = 4
         pad_size = int(np.ceil((KERNEL_SIZE - 1) / 2))
@@ -42,8 +43,12 @@ class Discriminator(Model):
 	@tf.function
     # I am pretty sure that this is wrong. Talk to Jeremy to determine how to fix it.
 	def call(self, inputs, segmaps):
+        # FIXME: Need to ask someone if this actually works as I believe it does.
         x = tf.concat([segmaps, inputs], axis=-1)
 		return self.model(x)
+
+    def discriminator_loss(segmap, generated, real):
+        # I have no idea how to do the discriminator loss
 
 
     # NOTE: The loss function for the discriminator is going to be in the 
