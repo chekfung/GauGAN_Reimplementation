@@ -10,8 +10,22 @@ import argparse
 
 from discriminator import Discriminator 
 from generator import SPADEGenerator
+from preprocess import load_image_batch
 
-help='Data where sampled output images will be written')
+# Killing optional CPU driver warnings
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+gpu_available = tf.test.is_gpu_available()
+print("GPU Available: ", gpu_available)
+
+## --------------------------------------------------------------------------------------
+parser = argparse.ArgumentParser(description='GAUGAN')
+
+parser.add_argument('--img-dir', type=str, default='./data/',
+					help='Data where training images live')
+
+parser.add_argument('--out-dir', type=str, default='./output',
+					help='Data where sampled output images will be written')
 
 parser.add_argument('--mode', type=str, default='train',
 					help='Can be "train" or "test"')
