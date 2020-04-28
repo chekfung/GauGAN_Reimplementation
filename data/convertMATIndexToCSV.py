@@ -49,13 +49,15 @@ class ADEIndex():
   
   filename_col = pd.DataFrame(columns=['filename'])
 
-  for i in filename_col_nested:
-    filename_col['filename'][i] = filename_col_nested[i][0]
+  for index, row in filename_col_nested.iterrows():
+    filename_col.loc[index] = filename_col_nested['filename'][index][0]
 
-  print(filename_col['filename'][0])
+  folder_col_nested = pd.DataFrame(matindex['folder'].T, columns=['folder'])
 
+  folder_col = pd.DataFrame(columns=['folder'])
 
-  folder_col = pd.DataFrame(matindex['folder'].T, columns=['folder'])
+  for index, row in folder_col_nested.iterrows():
+    folder_col.loc[index] = folder_col_nested['folder'][index][0]
 
   # I don't know what this column is for (it's not documented on the dataset site)
   typeset_col = pd.DataFrame(matindex['typeset'], columns=['typeset'])
@@ -66,13 +68,20 @@ class ADEIndex():
   # putting the columns together
   image_index = pd.concat([filename_col, folder_col, typeset_col, scene_col], axis=1)
 
+  print(image_index['folder'])
+
   # image_index.to_csv("csvIndexes/image_index.csv")
 
   # -------
 
   # Putting object attributes in a DataFrame
 
-  object_name_list = pd.DataFrame(matindex['objectnames'].T, columns=['objectnames'])
+  object_name_list_nested = pd.DataFrame(matindex['objectnames'].T, columns=['objectnames'])
+
+  object_name_list = pd.DataFrame(columns=['objectnames'])
+
+  for index, row in object_name_list_nested.iterrows():
+    object_name_list.loc[index] = object_name_list_nested['objectnames'][index][0]
 
   # object_name_list.to_csv("csvIndexes/object_names.csv")
 
@@ -89,8 +98,6 @@ class ADEIndex():
   object_image_matrix = pd.DataFrame(matindex['objectPresence'].T, 
                                     columns=object_name_list['objectnames'],
                                     index=filename_col['filename'])
-
-  # print(object_image_matrix.index)
 
   # Function to produce all 3 CSV files
   # THE LAST ONE IS KINDA BIG (for a CSV) - around 300 MB

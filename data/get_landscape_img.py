@@ -77,16 +77,17 @@ def get_images_by_object(data_set_path, train=True):
     # Now, for each of these object names, go in and grab all image filepaths that contain that object
     real_filepaths = set()
 
-    for obj in object_names:
+    # for name in object_names:
         
-        # if column of this object has a nonzero value, corresponding image should be added
-        obj_col = matindex.object_image_matrix[obj]
-        whether_image_has_object = not (obj_col == 0)
-        containing_images = obj_col[whether_image_has_object].index.flatten()
-        full_image_paths = 
-        real_filepaths.add()
+    #     object_cols_that_match = matindex.object_image_matrix.ix[:,[x for x in object_image_matrix.index if name in x]]
+
+    #     # if column of this object has a nonzero value, corresponding image should be added
+    #     whether_image_has_object = not (object_cols_that_match == 0)
+    #     containing_images = obj_col[whether_image_has_object].index.flatten()
+    #     full_image_paths = 
+    #     real_filepaths.add()
         
-    real_filepaths.append(os.path.join(orig_path, path))
+    # real_filepaths.append(os.path.join(orig_path, path))
     
     return real_filepaths
 
