@@ -8,6 +8,9 @@ from imageio import imwrite
 import os
 import argparse
 
+from discriminator import Discriminator 
+from generator import SPADEGenerator
+
 # Killing optional CPU driver warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
@@ -187,8 +190,8 @@ def main():
 	dataset_iterator = load_image_batch(args.img_dir, batch_size=args.batch_size, n_threads=args.num_data_threads)
 
 	# Initialize generator and discriminator models
-	generator = Generator_Model()
-	discriminator = Discriminator_Model()
+	generator = SPADEGenerator()
+	discriminator = Discriminator()
 
 	# For saving/loading models
 	checkpoint_dir = './checkpoints'
