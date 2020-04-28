@@ -133,7 +133,7 @@ def train(generator, discriminator, dataset_iterator, manager):
 			
 			#Get discriminator output for fake images and real images
 			disc_real = discriminator.call(batch)
-			disc_fake = discriminator.call(gen_output)
+			disc_fake = discriminator.call(gen_output, noise)
 			
 			#calculate gen. loss and disc. loss
 			g_loss = generator.loss_function(disc_fake)
