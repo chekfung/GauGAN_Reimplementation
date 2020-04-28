@@ -21,8 +21,11 @@ print("GPU Available: ", gpu_available)
 ## --------------------------------------------------------------------------------------
 parser = argparse.ArgumentParser(description='GAUGAN')
 
-parser.add_argument('--img-dir', type=str, default='./data/',
+parser.add_argument('--train-img-dir', type=str, default='./data/landscape_data/train',
 					help='Data where training images live')
+
+parser.add_argument('--test-img-dir', type=str, default='./data/landscape_data/test',
+					help='Data where test images live')
 
 parser.add_argument('--out-dir', type=str, default='./output',
 					help='Data where sampled output images will be written')
@@ -114,26 +117,33 @@ def train(generator, discriminator, dataset_iterator, manager):
 	"""
 	# Loop over our data until we run out
 	total_fid = 0
+	total_gen_loss = 0
+	total_disc_loss =0
 	iterations = 0
+
 	for iteration, batch in enumerate(dataset_iterator):
-		# TODO: Train the model
-		
+
+		# Break batch up into images and segmaps 
+		images, seg_maps = batch
+
 		with tf.GradientTape() as generator_tape, tf.GradientTape() as discriminator_tape:
-			#generate random noise
-			noise = tf.random.uniform((args.batch_size, args.z_dim), minval=-1, maxval=1)
+
+			# calculate generator output
+			gen_output = generator.call(seg_maps)
 			
-			#calculate generator output
-			gen_output = generator.call(noise)
+			# Get discriminator output for fake images and real images
+			disc_real = discriminator.call(images, seg_maps)
+			disc_fake = discriminator.call(gen_output, seg_maps)
 			
-			#Get discriminator output for fake images and real images
-			disc_real = discriminator.call(batch)
-			disc_fake = discriminator.call(gen_output, noise)
-			
-			#calculate gen. loss and disc. loss
+			# calculate gen. loss and disc. loss
 			g_loss = generator.loss(disc_fake)
 			d_loss = discriminator.loss(disc_real, disc_fake)
 			
-			#get gradients
+			# Update loss counters
+			total_gen_loss += g_loss
+			total_disc_loss += d_loss
+
+			# get gradients
 			g_grad = generator_tape.gradient(g_loss, generator.trainable_variables)
 			d_grad = discriminator_tape.gradient(d_loss, discriminator.trainable_variables)
 			
@@ -147,40 +157,55 @@ def train(generator, discriminator, dataset_iterator, manager):
 		# Calculate inception distance and track the fid in order
 		# to return the average
 		if iteration % 500 == 0:
-			fid_ = fid_function(batch, gen_output)
+			fid_ = fid_function(images, gen_output)
 			total_fid += fid_
 			iterations += 1
 			print('**** INCEPTION DISTANCE: %g ****' % fid_)
-	return total_fid / iterations
+	return total_fid / iterations, total_gen_loss / iterations, total_disc_loss / iterations
 
 
 # Test the model by generating some samples.
-def test(generator):
+def test(generator, dataset_iterator):
 	"""
 	Test the model.
 	:param generator: generator model
 	:return: None
 	"""
-	# TODO: Replace 'None' with code to sample a batch of random images
-	noise = tf.random.uniform((args.batch_size, args.z_dim), minval=-1, maxval=1)
-	img = generator.call(noise).numpy()
+	total_fid = 0
+	total_gen_loss = 0
+	total_disc_loss = 0
+	iterations = 0
 
-	### Below, we've already provided code to save these generated images to files on disk
-	# Rescale the image from (-1, 1) to (0, 255)
-	img = ((img / 2) - 0.5) * 255
-	# Convert to uint8
-	img = img.astype(np.uint8)
-	# Save images to disk
-	for i in range(0, args.batch_size):
-		img_i = img[i]
-		s = args.out_dir+'/'+str(i)+'.png'
-		imwrite(s, img_i)
+	for iteration, batch in enumerate(dataset_iterator):
+		image, seg_map = batch
+		img = generator.call(seg_map).numpy()
 
+		# Rescale the image from (-1, 1) to (0, 255)
+		img = ((img / 2) - 0.5) * 255
+		# Convert to uint8
+		img = img.astype(np.uint8)
+		# Save images to disk
+		for i in range(0, 1):
+			img_i = img[i]
+			s = args.out_dir+'/'+str(i)+'_generated.png'
+			s2 = args.out_dir+'/'+str(i)+'_truth.png'
+			imwrite(s, img_i)
+			imwrite(s2, image)
+
+		iterations += 1
+	
+	return total_fid / iterations, total_gen_loss / iterations, total_disc_loss / iterations
+	
 ## --------------------------------------------------------------------------------------
 
 def main():
-	# Load a batch of images (to feed to the discriminator)
-	dataset_iterator = load_image_batch(args.img_dir, batch_size=args.batch_size, n_threads=args.num_data_threads)
+	# Load train images (to feed to the discriminator)
+	train_dataset_iterator = load_image_batch(args.train_img_dir, batch_size=args.batch_size, \
+		n_threads=args.num_data_threads)
+	
+	# Get number of train images and make an iterator over it
+	test_dataset_iterator = load_image_batch(args.test_img_dir, batch_size=1, \
+		n_threads=args.num_data_threads, drop_remainder=False)
 
 	# Initialize generator and discriminator models
 	generator = SPADEGenerator()
@@ -205,15 +230,16 @@ def main():
 			if args.mode == 'train':
 				for epoch in range(0, args.num_epochs):
 					print('========================== EPOCH %d  ==========================' % epoch)
-					avg_fid = train(generator, discriminator, dataset_iterator, manager)
+					avg_fid, avg_g_loss, avg_d_loss = train(generator, discriminator, train_dataset_iterator, manager)
 					print("Average FID for Epoch: " + str(avg_fid))
 					# Save at the end of the epoch, too
 					print("**** SAVING CHECKPOINT AT END OF EPOCH ****")
 					manager.save()
 			if args.mode == 'test':
-				test(generator)
+				avg_fid, avg_g_loss, avg_d_loss = test(generator, test_dataset_iterator)
 	except RuntimeError as e:
 		print(e)
-
+	
 if __name__ == '__main__':
-   main()
+	main()
+

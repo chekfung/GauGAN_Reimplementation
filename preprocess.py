@@ -9,7 +9,7 @@ MODELED AFTER Brown CSCI 1470 DEEP LEARNING GAN ASSIGNMENT 7 HOMEWORK
 
 # Sets up tensorflow graph to load images
 # (This is the version using new-style tf.data API)
-def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=250000, n_threads=2):
+def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=250000, n_threads=2, drop_remainder=True):
     """
     Given a directory and a batch size, the following method returns a dataset iterator that can be queried for 
     a batch of images
@@ -67,9 +67,12 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=250000, n_thre
 
         # Randomly crop images
         stacked_image = tf.stack([image, segmap], axis=0)
+
+        # Note: Technically should be 160 by 120, so if we need to hardcode it, we can hardcode it.
         cropped_stack = tf.image.random_crop(stacked_image, size=[2, image.shape[0], image.shape[1], 3])
 
-        # TODO: We need to unstack them still
+        aug_image = cropped_stack[0]
+        aug_segmap = cropped_stack[1]
 
         return (aug_image, aug_segmap)
 
@@ -104,7 +107,7 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=250000, n_thre
 
     # Create batch, dropping the final one which has less than batch_size elements and finally set to reshuffle
     # the dataset at the end of each iteration
-    dataset = dataset.batch(batch_size, drop_remainder=True)
+    dataset = dataset.batch(batch_size, drop_remainder=drop_remainder)
 
     # Prefetch the next batch while the GPU is training
     dataset = dataset.prefetch(1)
