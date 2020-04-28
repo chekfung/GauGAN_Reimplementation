@@ -7,7 +7,9 @@ import argparse
 parser = argparse.ArgumentParser(description='GAUGAN')
 
 parser.add_argument('--printCSVs', type=str, default='N',
-					help='Whether to print CSV files from MATLAB index')
+					help='Whether to print CSV files from MATLAB index (Y or N)')
+
+args = parser.parse_args()
 
 class ADEIndex():
 
@@ -37,7 +39,7 @@ class ADEIndex():
 
   for name_i in matindex.dtype.names:
     print("Attribute: ", name_i)
-    print("Dimensions of ", name_i ": ", matindex[name_i].shape)
+    print("Dimensions of ", name_i, ": ", matindex[name_i].shape)
 
   # --------
 
@@ -78,16 +80,23 @@ class ADEIndex():
 
   object_image_matrix = pd.DataFrame(matindex['objectPresence'].T, 
                                     columns=object_name_list['objectnames'],
-                                    index=filename_col['filename'])
+                                    index=filename_col['filename'].ravel())
+
+  # print(object_image_matrix.index)
 
   # Function to produce all 3 CSV files
   # THE LAST ONE IS KINDA BIG (for a CSV) - around 300 MB
-  def printALLCSVs():
+  def printALLCSVs(self):
     image_index.to_csv("csvIndexes/image_index.csv")
     object_name_list.to_csv("csvIndexes/object_names.csv")
     object_image_matrix.to_csv("csvIndexes/object_image_matrix.csv")
 
 def main():
   index = ADEIndex()
-  if args.printALLCSVs == 'Y':
-    index.printALLCSVs()	main()
+  if args.printCSVs == 'Y':
+    print("Now printing CSV files")
+    index.printALLCSVs()
+    print("Your CSV files are now toasty and warm")
+
+if __name__ == '__main__':
+  main()
