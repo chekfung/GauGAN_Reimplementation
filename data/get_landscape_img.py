@@ -10,6 +10,7 @@ from skimage.io import imread, imsave
 from skimage import img_as_ubyte
 from skimage.transform import resize
 import scipy.io as sio
+import convertMATIndexToCSV as matindex
 
 # Schema to separate the files from each other.
 
@@ -73,21 +74,19 @@ def get_images_by_object(data_set_path, train=True):
             if line != '\n':
                 object_names.append(line.strip())
 
-    # Now, for each of these object names, go in and grab their actual destinations
-    real_filepaths = []
+    # Now, for each of these object names, go in and grab all image filepaths that contain that object
+    real_filepaths = set()
 
     for obj in object_names:
-        # outliers is an exception, so check if outliers first
-        if len(file) >= 8:
-            if file[0:8] == 'outliers':
-                path = file
-            else:
-                path = os.path.join(str(file[0]), file)
-        else:
-            # Get first letter in the string
-            path = os.path.join(str(file[0]), file)
         
-        real_filepaths.append(os.path.join(orig_path, path))
+        # if column of this object has a nonzero value, corresponding image should be added
+        obj_col = matindex.object_image_matrix[obj]
+        whether_image_has_object = not (obj_col == 0)
+        containing_images = obj_col[whether_image_has_object].index.flatten()
+        full_image_paths = 
+        real_filepaths.add()
+        
+    real_filepaths.append(os.path.join(orig_path, path))
     
     return real_filepaths
 

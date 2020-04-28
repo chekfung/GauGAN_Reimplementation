@@ -5,19 +5,20 @@ from spadeblock import SpadeBlock
 
 
 class SPADEGenerator(tf.keras.Model):
-    def __init__(self):
+    def __init__(self, beta1=0.5, beta2=0.999, learning_rate=0.0001, batch_size=32, z_dim=1024, \
+        img_w=160, img_h=120):
         super(SPADEGenerator, self).__init__()
         
-        self.beta1 = 0.0
-        self.beta2 = 0.999
-        self.learning_rate = 0.0001
+        self.beta1 = beta1
+        self.beta2 = beta2
+        self.learning_rate = learning_rate
         self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.learning_rate, beta_1 = self.beta1, beta_2 = self.beta2)
-        self.batch_size = 32
+        self.batch_size = batch_size
         self.num_spade_layers = 7
         self.spade_layers = []
-        self.num_channels = 1024
-        self.image_width = 160
-        self.image_height = 120
+        self.num_channels = z_dim
+        self.image_width = img_w
+        self.image_height = img_h
         self.dense = tf.keras.layers.Dense(self.image_height*self.image_width*self.num_channels)
         self.spade_layers.append(SpadeBlock(1024, 1024))
         self.spade_layers.append(SpadeBlock(1024, 1024))

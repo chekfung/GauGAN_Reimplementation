@@ -6,11 +6,12 @@ import numpy as np
 
 from imageio import imwrite
 import os
+import csv
 import argparse
 
-from discriminator import Discriminator 
-from generator import SPADEGenerator
-from preprocess import load_image_batch
+from code.discriminator import Discriminator 
+from code.generator import SPADEGenerator
+from code.preprocess import load_image_batch
 
 # Killing optional CPU driver warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -39,7 +40,7 @@ parser.add_argument('--restore-checkpoint', action='store_true',
 parser.add_argument('--z-dim', type=int, default=1024,
 					help='Dimensionality of the latent space')
 
-parser.add_argument('--batch-size', type=int, default=128,
+parser.add_argument('--batch-size', type=int, default=32,
 					help='Sizes of image batches fed through the network')
 
 parser.add_argument('--num-data-threads', type=int, default=2,
@@ -59,6 +60,12 @@ parser.add_argument('--beta1', type=float, default=0.5,
 
 parser.add_argument('--beta2', type=float, default=0.999,
 					help='"beta2" parameter for Adam optimizer')
+					
+parser.add_argument('--img-h', type=int, default=120,
+					help='height of image')
+					
+parser.add_argument('--img-w', type=int, default=160,
+					help='width of image')
 
 parser.add_argument('--log-every', type=int, default=7,
 					help='Print losses after every [this many] training iterations')
@@ -208,8 +215,8 @@ def main():
 		n_threads=args.num_data_threads, drop_remainder=False)
 
 	# Initialize generator and discriminator models
-	generator = SPADEGenerator()
-	discriminator = Discriminator()
+	generator = SPADEGenerator(args.beta1, args.beta2, args.gen_learn_rate, args.batch_size, args.z_dim, args.img_w, args.img_h)
+	discriminator = Discriminator(args.beta1, args.beta2, args.dsc_learn_rate)
 
 	# For saving/loading models
 	checkpoint_dir = './checkpoints'
@@ -235,11 +242,54 @@ def main():
 					# Save at the end of the epoch, too
 					print("**** SAVING CHECKPOINT AT END OF EPOCH ****")
 					manager.save()
+					
+					# Save the losses and fid into a CSV that we make.
+					logs_path = "logs"
+					fn = "fid_losses_train.csv"
+					full_path = logs_path + '/' + fn
+					
+					# Make logs directory if it does not exist
+					if (not os.path.exists(logs_path)):
+						os.path.makedir(logs_path)
+
+					# If first Epoch create new file
+					if epoch == 0:
+						with open(full_path, 'w') as csvfile:
+							csvwriter = csv.writer(csvfile)
+
+							# Write the categories and first epoch info
+							csvwriter.writerow(['Average FID', 'Average Generator Loss', 'Average Discriminator Loss'])
+							csvwriter.writerow([avg_fid, avg_g_loss, avg_d_loss])
+					else:
+						# If any other epoch, append
+						with open(full_path, 'a+', newline='') as csvfile:  
+							csvwritter = csv.writer(csvfile)
+
+							# Write epoch information
+							csvwritter.writerow([avg_fid, avg_g_loss, avg_d_loss])
+
 			if args.mode == 'test':
 				avg_fid, avg_g_loss, avg_d_loss = test(generator, test_dataset_iterator)
+
+				# Save the losses and fid into a CSV that we make.
+					logs_path = "logs"
+					fn = "fid_losses_test.csv"
+					full_path = logs_path + '/' + fn
+					
+					# Make logs directory if it does not exist
+					if (not os.path.exists(logs_path)):
+						os.path.makedir(logs_path)
+
+					# If first Epoch create new file
+					with open(full_path, 'w') as csvfile:
+						csvwriter = csv.writer(csvfile)
+
+						# Write the categories and first epoch info
+						csvwriter.writerow(['Average FID', 'Average Generator Loss', 'Average Discriminator Loss'])
+						csvwriter.writerow([avg_fid, avg_g_loss, avg_d_loss])
+
 	except RuntimeError as e:
 		print(e)
 	
 if __name__ == '__main__':
 	main()
-
