@@ -33,7 +33,7 @@ parser.add_argument('--mode', type=str, default='train',
 parser.add_argument('--restore-checkpoint', action='store_true',
 					help='Use this flag if you want to resuming training from a previously-saved checkpoint')
 
-parser.add_argument('--z-dim', type=int, default=100,
+parser.add_argument('--z-dim', type=int, default=1024,
 					help='Dimensionality of the latent space')
 
 parser.add_argument('--batch-size', type=int, default=128,
@@ -130,14 +130,15 @@ def train(generator, discriminator, dataset_iterator, manager):
 			disc_fake = discriminator.call(gen_output, noise)
 			
 			#calculate gen. loss and disc. loss
-			g_loss = generator.loss_function(disc_fake)
-			d_loss = discriminator.loss_function(disc_real, disc_fake)
+			g_loss = generator.loss(disc_fake)
+			d_loss = discriminator.loss(disc_real, disc_fake)
 			
 			#get gradients
 			g_grad = generator_tape.gradient(g_loss, generator.trainable_variables)
 			d_grad = discriminator_tape.gradient(d_loss, discriminator.trainable_variables)
 			
 		generator.optimizer.apply_gradients(zip(g_grad, generator.trainable_variables))
+		discriminator.optimizer.apply_gradients(zip(d_grad, discriminator.trainable_variables))
 		
 		# Save
 		if iteration % args.save_every == 0:
