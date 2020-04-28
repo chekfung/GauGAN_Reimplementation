@@ -46,7 +46,7 @@ class ADEIndex():
   # putting image attributes in a DataFrame
 
   filename_col = pd.DataFrame(matindex['filename'].T, columns=['filename'])
-
+  
   folder_col = pd.DataFrame(matindex['folder'].T, columns=['folder'])
 
   # I don't know what this column is for (it's not documented on the dataset site)
@@ -80,7 +80,7 @@ class ADEIndex():
 
   object_image_matrix = pd.DataFrame(matindex['objectPresence'].T, 
                                     columns=object_name_list['objectnames'],
-                                    index=filename_col['filename'].ravel())
+                                    index=filename_col['filename'])
 
   # print(object_image_matrix.index)
 

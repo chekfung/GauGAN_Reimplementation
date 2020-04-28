@@ -167,7 +167,7 @@ def main():
     HEIGHT = 120
     WIDTH = 160
     # Create the file directories to house the new resized imgs
-    file_dir = 'data/landscape_data'
+    file_dir = 'landscape_data'
     train, test = make_save_dir(file_dir)
     print(train)
     print(test)
@@ -177,7 +177,7 @@ def main():
     # Get the filepaths of the imgs that we want for train
     filepaths = find_explicit_files(data_set_path)
 
-    filepaths.append(get_images_by_object(data_set_path))
+    # filepaths.append(get_images_by_object(data_set_path))
     
     for filepath in filepaths:
         imgs, segs = get_files(filepath)
