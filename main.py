@@ -128,6 +128,9 @@ def train(generator, discriminator, dataset_iterator, manager):
 	total_disc_loss =0
 	iterations = 0
 
+	print("dataset_iterator is ", dataset_iterator)
+	print(dataset_iterator[0])
+
 	for iteration, batch in enumerate(dataset_iterator):
 
 		# Break batch up into images and segmaps 

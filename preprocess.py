@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-import tensorfow_addons as tfa
+import tensorflow_addons as tfa
 import os
 
 """
@@ -78,8 +78,6 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
 
     def get_image_segmap_pair(segmap_path):
         print("AHHHHHHH", segmap_path)
-        pause = input()
-
 
         """
         Given a filepath for a segmap, this function gets the corresponding segmap and returns the (image, segmap) tuple after decoding both.
@@ -105,20 +103,20 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
     seg_path = dir_name + '/*_seg.png'
     print("segpath is ", seg_path)
     dataset = tf.data.Dataset.list_files(seg_path)
-    print(dataset[0])
+    print(dataset)
 
-    # # Shuffle order
-    # dataset = dataset.shuffle(buffer_size=shuffle_buffer_size)
+    # Shuffle order
+    dataset = dataset.shuffle(buffer_size=shuffle_buffer_size)
 
     # Load and process images (in parallel)
-    # dataset = dataset.map(map_func=get_image_segmap_pair, num_parallel_calls=1)
+    dataset = dataset.map(map_func=get_image_segmap_pair, num_parallel_calls=1)
 
-    # # Create batch, dropping the final one which has less than batch_size elements and finally set to reshuffle
-    # # the dataset at the end of each iteration
-    # dataset = dataset.batch(batch_size, drop_remainder=drop_remainder)
+    # Create batch, dropping the final one which has less than batch_size elements and finally set to reshuffle
+    # the dataset at the end of each iteration
+    dataset = dataset.batch(batch_size, drop_remainder=drop_remainder)
 
-    # # Prefetch the next batch while the GPU is training
-    # dataset = dataset.prefetch(1)
+    # Prefetch the next batch while the GPU is training
+    dataset = dataset.prefetch(1)
 
     # Return an iterator over this dataset
     return dataset
