@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense, Flatten, Conv2D, BatchNormalization, LeakyReLU, Reshape, Conv2DTranspose 
 from tensorflow_addons.layers import InstanceNormalization
+import numpy as np
 
 
 # forward is call
@@ -41,7 +42,7 @@ class Discriminator(Model):
         self.model.add(LeakyReLU(alpha=ALPHA_VAL))
 
         # Final Convolutional Layer, as like PatchGAN implementation
-        self.model.add(Conv2D(filters=1, kernel_size=KERNEL_SIZE, strides=1, paddings="SAME"))
+        self.model.add(Conv2D(filters=1, kernel_size=KERNEL_SIZE, strides=1, padding="SAME"))
 
 
     @tf.function
