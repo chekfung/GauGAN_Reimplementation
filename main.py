@@ -43,7 +43,7 @@ parser.add_argument('--z-dim', type=int, default=1024,
 parser.add_argument('--batch-size', type=int, default=32,
 					help='Sizes of image batches fed through the network')
 
-parser.add_argument('--num-data-threads', type=int, default=2,
+parser.add_argument('--num-data-threads', type=int, default=1,
 					help='Number of threads to use when loading & pre-processing training images')
 
 parser.add_argument('--num-epochs', type=int, default=200,
@@ -207,6 +207,10 @@ def test(generator, dataset_iterator):
 
 def main():
 	# Load train images (to feed to the discriminator)
+	print("We are now going to call load_image_batch")
+	print(args.train_img_dir)
+	print(args.batch_size)
+	print(args.num_data_threads)
 	train_dataset_iterator = load_image_batch(args.train_img_dir, batch_size=args.batch_size, \
 		n_threads=args.num_data_threads)
 	

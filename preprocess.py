@@ -9,7 +9,7 @@ MODELED AFTER Brown CSCI 1470 DEEP LEARNING GAN ASSIGNMENT 7 HOMEWORK
 
 # Sets up tensorflow graph to load images
 # (This is the version using new-style tf.data API)
-def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=250000, n_threads=2, drop_remainder=True):
+def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=1, drop_remainder=True):
     """
     Given a directory and a batch size, the following method returns a dataset iterator that can be queried for 
     a batch of images
@@ -77,6 +77,10 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=250000, n_thre
         return (aug_image, aug_segmap)
 
     def get_image_segmap_pair(segmap_path):
+        print("AHHHHHHH", segmap_path)
+        pause = input()
+
+
         """
         Given a filepath for a segmap, this function gets the corresponding segmap and returns the (image, segmap) tuple after decoding both.
 
@@ -84,33 +88,37 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=250000, n_thre
 
         :return: (image, segmap) tuple, both decoded
         """
-        image_path = segmap_path[:-8] + '.png'
+        # image_path = segmap_path[:-8] + '.png'
+        image_path = 'a'
 
         # Load in image pair to return
         segmap = load_and_process_image(segmap_path)
         image = load_and_process_image(image_path)
 
-        augmented_pair = augment(image, segmap)
+        # augmented_pair = augment(image, segmap)
 
-        return augmented_pair
+        # return augmented_pair
+        return image, segmap
 
     
     # RegEx to match all segmap paths
     seg_path = dir_name + '/*_seg.png'
+    print("segpath is ", seg_path)
     dataset = tf.data.Dataset.list_files(seg_path)
+    print(dataset[0])
 
-    # Shuffle order
-    dataset = dataset.shuffle(buffer_size=shuffle_buffer_size)
+    # # Shuffle order
+    # dataset = dataset.shuffle(buffer_size=shuffle_buffer_size)
 
     # Load and process images (in parallel)
-    dataset = dataset.map(map_func=get_image_segmap_pair, num_parallel_calls=n_threads)
+    # dataset = dataset.map(map_func=get_image_segmap_pair, num_parallel_calls=1)
 
-    # Create batch, dropping the final one which has less than batch_size elements and finally set to reshuffle
-    # the dataset at the end of each iteration
-    dataset = dataset.batch(batch_size, drop_remainder=drop_remainder)
+    # # Create batch, dropping the final one which has less than batch_size elements and finally set to reshuffle
+    # # the dataset at the end of each iteration
+    # dataset = dataset.batch(batch_size, drop_remainder=drop_remainder)
 
-    # Prefetch the next batch while the GPU is training
-    dataset = dataset.prefetch(1)
+    # # Prefetch the next batch while the GPU is training
+    # dataset = dataset.prefetch(1)
 
     # Return an iterator over this dataset
     return dataset
