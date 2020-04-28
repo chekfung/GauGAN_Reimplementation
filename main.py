@@ -11,21 +11,6 @@ import argparse
 from discriminator import Discriminator 
 from generator import SPADEGenerator
 
-# Killing optional CPU driver warnings
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
-gpu_available = tf.test.is_gpu_available()
-print("GPU Available: ", gpu_available)
-
-## --------------------------------------------------------------------------------------
-
-parser = argparse.ArgumentParser(description='GAUGAN')
-
-#TODO: set default dir
-parser.add_argument('--img-dir', type=str, default='./data/ade20k',
-					help='Data where training images live')
-
-parser.add_argument('--out-dir', type=str, default='./output',
 					help='Data where sampled output images will be written')
 
 parser.add_argument('--mode', type=str, default='train',
