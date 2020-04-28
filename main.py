@@ -272,21 +272,21 @@ def main():
 				avg_fid, avg_g_loss, avg_d_loss = test(generator, test_dataset_iterator)
 
 				# Save the losses and fid into a CSV that we make.
-					logs_path = "logs"
-					fn = "fid_losses_test.csv"
-					full_path = logs_path + '/' + fn
-					
-					# Make logs directory if it does not exist
-					if (not os.path.exists(logs_path)):
-						os.path.makedir(logs_path)
+				logs_path = "logs"
+				fn = "fid_losses_test.csv"
+				full_path = logs_path + '/' + fn
+				
+				# Make logs directory if it does not exist
+				if (not os.path.exists(logs_path)):
+					os.path.makedir(logs_path)
 
-					# If first Epoch create new file
-					with open(full_path, 'w') as csvfile:
-						csvwriter = csv.writer(csvfile)
+				# If first Epoch create new file
+				with open(full_path, 'w') as csvfile:
+					csvwriter = csv.writer(csvfile)
 
-						# Write the categories and first epoch info
-						csvwriter.writerow(['Average FID', 'Average Generator Loss', 'Average Discriminator Loss'])
-						csvwriter.writerow([avg_fid, avg_g_loss, avg_d_loss])
+					# Write the categories and first epoch info
+					csvwriter.writerow(['Average FID', 'Average Generator Loss', 'Average Discriminator Loss'])
+					csvwriter.writerow([avg_fid, avg_g_loss, avg_d_loss])
 
 	except RuntimeError as e:
 		print(e)
