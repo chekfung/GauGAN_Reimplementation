@@ -222,6 +222,11 @@ def main():
 	generator = SPADEGenerator(args.beta1, args.beta2, args.gen_learn_rate, args.batch_size, args.z_dim, args.img_w, args.img_h)
 	discriminator = Discriminator(args.beta1, args.beta2, args.dsc_learn_rate)
 
+	print('========================== GENERATOR ==========================')
+	generator.summary()
+	print('========================== DISCRIMINATOR ==========================')
+	discriminator.summary()
+
 	# For saving/loading models
 	checkpoint_dir = './checkpoints'
 	checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
