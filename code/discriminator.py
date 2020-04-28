@@ -18,21 +18,21 @@ class Discriminator(Model):
         self.model = tf.keras.Sequential()
 
         # Initial first block
-        self.model.add(Conv2D(filters=64, kernel_size=KERNEL_SIZE, strides=2, padding=pad_size)
+        self.model.add(Conv2D(filters=64, kernel_size=KERNEL_SIZE, strides=2, padding=pad_size))
         self.model.add(LeakyReLU(alpha=ALPHA_VAL))
 
         # Second block
-        self.model.add(Conv2D(filters=128, kernel_size=KERNEL_SIZE, strides=2, padding=pad_size)
+        self.model.add(Conv2D(filters=128, kernel_size=KERNEL_SIZE, strides=2, padding=pad_size))
         self.model.add(InstanceNormalization())
         self.model.add(LeakyReLU(alpha=ALPHA_VAL))
 
         # Third block
-        self.model.add(Conv2D(filters=256, kernel_size=KERNEL_SIZE, strides=2, padding=pad_size)
+        self.model.add(Conv2D(filters=256, kernel_size=KERNEL_SIZE, strides=2, padding=pad_size))
         self.model.add(InstanceNormalization())
         self.model.add(LeakyReLU(alpha=ALPHA_VAL))
 
         # Fourth block
-        self.model.add(Conv2D(filters=512, kernel_size=KERNEL_SIZE, strides=1, padding=pad_size)
+        self.model.add(Conv2D(filters=512, kernel_size=KERNEL_SIZE, strides=1, padding=pad_size))
         self.model.add(InstanceNormalization())
         self.model.add(LeakyReLU(alpha=ALPHA_VAL))
 
@@ -40,19 +40,18 @@ class Discriminator(Model):
         self.model.add(Conv2D(filters=1, kernel_size=KERNEL_SIZE, strides=1, paddings=pad_size))
 
 
-	@tf.function
-    # I am pretty sure that this is wrong. Talk to Jeremy to determine how to fix it.
-	def call(self, inputs, segmaps):
-        # FIXME: Need to ask someone if this actually works as I believe it does.
+    @tf.function
+    def call(self, inputs, segmaps):
         x = tf.concat([segmaps, inputs], axis=-1)
-		return self.model(x)
+        return self.model(x)
 
-    def discriminator_loss(segmap, generated, real):
-        # I have no idea how to do the discriminator loss
+    """
+    Paper concatenates fake and real images because in Batch Normalization, 
+    concatenating "avoids disparate statistics in fake and real images". We have
+    opted to skip this and return if we have time
+    """
+    def discriminator_loss(fake_output, real_output):
+        real_loss = -tf.reduce_mean(tf.minimum(real - 1, 0))
+        fake_loss = -tf.reduce_mean(tf.minimum(-fake - 1, 0))
 
-
-    # NOTE: The loss function for the discriminator is going to be in the 
-    # loss.py file of the model. 
-
-    # Will talk with Jeremy to see if that makes sense. If not, I will 
-    # just write it in here and have it here instead.
+        return tf.reduce_mean(real_loss + fake_loss)

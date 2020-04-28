@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+import tensorfow_addons as tfa
 import os
 
 """
@@ -16,6 +17,7 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=250000, n_thre
     :param dir_name: a batch of images
     :param batch_size: the batch size of images that will be trained on each time
     :param shuffle_buffer_size: representing the number of elements from this dataset from which the new dataset will 
+    NOTE: At the moment, we do not know if we need to change this ^
     sample
     :param n_thread: the number of threads that will be used to fetch the data
 
@@ -39,6 +41,37 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=250000, n_thre
         # Rescale data to range (-1, 1)
         image = (image - 0.5) * 2
         return image
+    
+    def augment(image, segmap):
+        """
+        Given an image-segmap pair, apply identical image augmentation
+
+        :param image: decoded tf images
+
+        :param segmap: decoded segmap tf images
+ 
+        :return: augmented (image, segmap) tuple, both decoded
+        """
+        # Flip image horizontally
+        flip_bool = np.random.rand()
+
+        if (flip_bool >= 0.5):
+            image = tf.image.flip_left_right(image)
+            segmap = tf.image.flip_left_right(image)
+
+        # Rotate image (15-20 degrees or so)
+        deg_range = 15 
+        rotation_angle = np.random.randint(-np.radians(deg_range),np.radians(deg_range))
+        image = tfa.image.rotate(image, rotation_angle)
+        segmap = tfa.image.rotate(segmap, rotation_angle)
+
+        # Randomly crop images
+        stacked_image = tf.stack([image, segmap], axis=0)
+        cropped_stack = tf.image.random_crop(stacked_image, size=[2, image.shape[0], image.shape[1], 3])
+
+        # TODO: We need to unstack them still
+
+        return (aug_image, aug_segmap)
 
     def get_image_segmap_pair(segmap_path):
         """
@@ -54,7 +87,9 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=250000, n_thre
         segmap = load_and_process_image(segmap_path)
         image = load_and_process_image(image_path)
 
-        return (image, segmap)
+        augmented_pair = augment(image, segmap)
+
+        return augmented_pair
 
     
     # RegEx to match all segmap paths
