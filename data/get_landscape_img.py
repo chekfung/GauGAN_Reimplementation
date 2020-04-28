@@ -9,6 +9,10 @@ import matplotlib.pyplot as plt
 from skimage.io import imread, imsave
 from skimage import img_as_ubyte
 from skimage.transform import resize
+<<<<<<< HEAD
+=======
+import scipy.io as sio
+>>>>>>> charlie_ssh
 
 # Schema to separate the files from each other.
 
@@ -16,7 +20,11 @@ from skimage.transform import resize
 # Then, will be labeled with unique ID where stored in json if we need to access the files
 # Segmaps will be in one folder with same ID and name; Images will be in another folder
 
+<<<<<<< HEAD
 def find_files(data_set_path, train=True):
+=======
+def find_explicit_files(data_set_path, train=True):
+>>>>>>> charlie_ssh
     # NOTE: default data_set_path is: ADE20K_2016_07_26/images
     '''
     Given the cv_landscapes_final_project.txt, which contains all of the possible
@@ -56,6 +64,21 @@ def find_files(data_set_path, train=True):
     
     return real_filepaths
 
+<<<<<<< HEAD
+=======
+def get_probably_useful_files(data_set_path, train=True):
+    
+    # get images based on object 
+
+    if train:
+        orig_path = os.path.join(sys.path[0], data_set_path, 'training')
+        print(orig_path)
+    else:
+        orig_path = os.path.join(sys.path[0], data_set_path, 'validation')
+
+
+
+>>>>>>> charlie_ssh
 def get_files(file_path):
     '''
     Provided a directory filepath, grabs all of the segmentation maps of the 
@@ -137,8 +160,17 @@ def main():
     print(train)
     print(test)
 
+<<<<<<< HEAD
     # Get the filepaths of the imgs that we want for train
     filepaths = find_files(os.path.join('ADE20K_2016_07_26', 'images'))
+=======
+    data_set_path = os.path.join('ADE20K_2016_07_26', 'images')
+
+    # Get the filepaths of the imgs that we want for train
+    filepaths = find_explicit_files(data_set_path)
+
+    filepaths.append(get_probably_useful_files(data_set_path))
+>>>>>>> charlie_ssh
     
     for filepath in filepaths:
         imgs, segs = get_files(filepath)
@@ -161,7 +193,11 @@ def main():
         
     remove_parts_two(train)
 
+<<<<<<< HEAD
     print("Done loading Training data")
+=======
+    print("Done loading resized Training data")
+>>>>>>> charlie_ssh
 
     filepaths = find_files(os.path.join('ADE20K_2016_07_26', 'images'), train=False)
     # For the testing/validation set
@@ -185,7 +221,11 @@ def main():
             imsave(f, img_as_ubyte(resized))
     
     remove_parts_two(test)
+<<<<<<< HEAD
     print("Done loading Testing Data")
+=======
+    print("Done loading resized Testing Data")
+>>>>>>> charlie_ssh
     
 
 # ============================================================================ #
