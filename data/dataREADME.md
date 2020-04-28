@@ -1,0 +1,5 @@
+
+# On the Dataset, from https://groups.csail.mit.edu/vision/datasets/ADE20K/
+
+Some classes can be both objects and parts. For instance, a "door" can be an object (in an indoor picture), or a part (when it is the "door" of a "car"). Some objects are always parts (e.g., a "leg", a "hand", ...), although, in some cases they can appear detached of the whole (e.g., a car "wheel" inside a garage), and some object are never parts (e.g., a "person", a "truck", ...). The same name class (e.g., "door") can correspond to several visual categories depending on which object it is a part of. For instance a car door is visually different from a cabinet door or a building door. However they share similar affordances. The value proportionClassIsPart(c) can be used to decide if a class behaves mostly as an object or as a part. When an object is not part of another object its segmentation mask will appear inside *_seg.png. If the class behaves as a part, then the segmentation mask will appear inside *_seg_parts.png. Correctly detecting an object requires classifying if the object is behaving as an independent object or if it is a part of another object.
+

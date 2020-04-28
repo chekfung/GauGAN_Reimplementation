@@ -1,3 +1,11 @@
+# Our Specific files to ignore
+data/ADE20K_2016_07_26/
+data/csvIndexes/
+fullDataSet.zip
+*.png
+*.jpg
+
+>>>>>>> charlie_ssh
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
