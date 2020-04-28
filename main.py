@@ -11,7 +11,7 @@ import argparse
 
 from code.discriminator import Discriminator 
 from code.generator import SPADEGenerator
-from code.preprocess import load_image_batch
+from preprocess import load_image_batch
 
 # Killing optional CPU driver warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -207,11 +207,11 @@ def test(generator, dataset_iterator):
 
 def main():
 	# Load train images (to feed to the discriminator)
-	train_dataset_iterator = load_image_batch(args.train_img_dir, batch_size=args.batch_size, \
+	train_dataset_iterator = load_image_batch(dir_name=args.train_img_dir, batch_size=args.batch_size, \
 		n_threads=args.num_data_threads)
 	
 	# Get number of train images and make an iterator over it
-	test_dataset_iterator = load_image_batch(args.test_img_dir, batch_size=1, \
+	test_dataset_iterator = load_image_batch(dir_name=args.test_img_dir, batch_size=1, \
 		n_threads=args.num_data_threads, drop_remainder=False)
 
 	# Initialize generator and discriminator models
