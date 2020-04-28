@@ -27,6 +27,8 @@ class SPADEGenerator(tf.keras.Model):
         self.spade_layers.append(SpadeBlock(256, 128))
         self.spade_layers.append(SpadeBlock(128, 64))
         self.conv_layer = tf.keras.layers.Conv2D(64, (3,3), activation='tanh')
+        
+        self.adversial_weight = 1
     def call(self, images):
         batch_size = np.shape(images)[0]
         noise = np.random.normal((batch_size, 1024))
@@ -39,6 +41,10 @@ class SPADEGenerator(tf.keras.Model):
         result = tf.nn.leaky_relu(result)
         result = self.conv_layer(result)
         return result
+    
+    def loss(self,fake_logits):
+        # Only hinge loss for now--can add extra losses later
+        return tf.keras.losses.hinge(tf.zeros_like(fake_logits), fake_logits)
     
 def upsample(batch_inputs):
     return tf.image.resize(batch_inputs, [2*np.shape(batch_inputs)[1], 2*np.shape(batch_inputs)[2]])
