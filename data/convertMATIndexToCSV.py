@@ -45,8 +45,16 @@ class ADEIndex():
 
   # putting image attributes in a DataFrame
 
-  filename_col = pd.DataFrame(matindex['filename'].T, columns=['filename'])
+  filename_col_nested = pd.DataFrame(matindex['filename'].T, columns=['filename'])
   
+  filename_col = pd.DataFrame(columns=['filename'])
+
+  for i in filename_col_nested:
+    filename_col['filename'][i] = filename_col_nested[i][0]
+
+  print(filename_col['filename'][0])
+
+
   folder_col = pd.DataFrame(matindex['folder'].T, columns=['folder'])
 
   # I don't know what this column is for (it's not documented on the dataset site)

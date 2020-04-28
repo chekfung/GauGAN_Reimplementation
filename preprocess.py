@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_addons as tfa
 import os
+import sys
 
 """
 MODELED AFTER Brown CSCI 1470 DEEP LEARNING GAN ASSIGNMENT 7 HOMEWORK
@@ -77,6 +78,9 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
         return (aug_image, aug_segmap)
 
     def get_image_segmap_pair(segmap_path):
+        print(type(segmap_path))
+        print(segmap_path)
+        print(tf.shape(segmap_path))
         print("AHHHHHHH", segmap_path)
 
         """
@@ -86,8 +90,17 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
 
         :return: (image, segmap) tuple, both decoded
         """
+
+        segmap_path_len = tf.strings.length(segmap_path)
+
+        # args are string tensor, start index, and length
+        image_name_without_ext = tf.strings.substr(segmap_path, 0, segmap_path_len - 8)
+
+        image_path = tf.strings.join([image_name_without_ext, '.png'])
+
         # image_path = segmap_path[:-8] + '.png'
-        image_path = 'a'
+        # image_path = 'a'
+        print("WOOOHOOOOOOOO")
 
         # Load in image pair to return
         segmap = load_and_process_image(segmap_path)

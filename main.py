@@ -223,6 +223,17 @@ def main():
 	discriminator = Discriminator(args.beta1, args.beta2, args.dsc_learn_rate)
 
 	print('========================== GENERATOR ==========================')
+	# Charlie arbitrarily put 4x4 for the input dims just to see if the code would run
+	# Error message: 
+	''''
+	  File "/gpfs/main/home/cgagnon1/course/cs1430/gaugan/James_TompGAN/code/generator.py", line 34, in call
+    result_dense = self.dense(noise)
+
+    ValueError: Input 0 of layer dense is incompatible with the layer: 
+    : expected min_ndim=2, found ndim=1. Full shape received: [2]
+
+	'''
+	generator.build(input_shape=(4,4))
 	generator.summary()
 	print('========================== DISCRIMINATOR ==========================')
 	discriminator.summary()
