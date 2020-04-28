@@ -2,8 +2,6 @@ import numpy as np
 import tensorflow as tf
 from spadeblock import SpadeBlock
 
-
-
 class SPADEGenerator(tf.keras.Model):
     def __init__(self, beta1=0.5, beta2=0.999, learning_rate=0.0001, batch_size=32, z_dim=1024, \
         img_w=160, img_h=120):

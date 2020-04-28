@@ -55,40 +55,40 @@ def find_explicit_files(data_set_path, train=True):
     return real_filepaths
 
 
-# def get_images_by_object(data_set_path, train=True):
+def get_images_by_object(data_set_path, train=True):
     
-#     # Given objects_we_want.txt, we select images based on whether they contain relevant objects
+    # Given objects_we_want.txt, we select images based on whether they contain relevant objects
 
-#     if train:
-#         orig_path = os.path.join(sys.path[0], data_set_path, 'training')
-#         print(orig_path)
-#     else:
-#         orig_path = os.path.join(sys.path[0], data_set_path, 'validation')
+    if train:
+        orig_path = os.path.join(sys.path[0], data_set_path, 'training')
+        print(orig_path)
+    else:
+        orig_path = os.path.join(sys.path[0], data_set_path, 'validation')
 
-#     object_names = []
-#     filename = 'objects_we_want.txt'
+    object_names = []
+    filename = 'objects_we_want.txt'
 
-#     # Get all the object names that we want
-#     with open(os.path.join(sys.path[0], filename)) as f:
-#         for line in f:
-#             if line != '\n':
-#                 object_names.append(line.strip())
+    # Get all the object names that we want
+    with open(os.path.join(sys.path[0], filename)) as f:
+        for line in f:
+            if line != '\n':
+                object_names.append(line.strip())
 
-#     # Now, for each of these object names, go in and grab all image filepaths that contain that object
-#     real_filepaths = set()
+    # Now, for each of these object names, go in and grab all image filepaths that contain that object
+    real_filepaths = set()
 
-#     for obj in object_names:
+    for obj in object_names:
         
-#         # if column of this object has a nonzero value, corresponding image should be added
-#         obj_col = matindex.object_image_matrix[obj]
-#         whether_image_has_object = not (obj_col == 0)
-#         containing_images = obj_col[whether_image_has_object].index.flatten()
-#         full_image_paths = 
-#         real_filepaths.add()
+        # if column of this object has a nonzero value, corresponding image should be added
+        obj_col = matindex.object_image_matrix[obj]
+        whether_image_has_object = not (obj_col == 0)
+        containing_images = obj_col[whether_image_has_object].index.flatten()
+        full_image_paths = 
+        real_filepaths.add()
         
-#     real_filepaths.append(os.path.join(orig_path, path))
+    real_filepaths.append(os.path.join(orig_path, path))
     
-#     return real_filepaths
+    return real_filepaths
 
 
 def get_files(file_path):
@@ -203,7 +203,7 @@ def main():
 
     print("Done loading resized Training data")
 
-    filepaths = find_files(os.path.join('ADE20K_2016_07_26', 'images'), train=False)
+    filepaths = find_explicit_files(os.path.join('ADE20K_2016_07_26', 'images'), train=False)
     # For the testing/validation set
     for filepath in filepaths:
         imgs, segs = get_files(filepath)
