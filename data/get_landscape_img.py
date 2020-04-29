@@ -10,6 +10,7 @@ from skimage.io import imread, imsave
 from skimage import img_as_ubyte
 from skimage.transform import resize
 import scipy.io as sio
+import pandas as pd
 import convertMATIndexToCSV as matindex
 
 # Schema to separate the files from each other.
@@ -32,7 +33,8 @@ def find_explicit_files(data_set_path, train=True):
         orig_path = os.path.join(sys.path[0], data_set_path, 'validation')
 
     file_categories = []
-    filename = 'cv_landscapes_final_project.txt'
+    # filename = 'explicit_cv_landscapes_final_project.txt'
+    filename = 'text_explicit.txt'
 
     # Get all the file categories that we want (Should be 47)
     with open(os.path.join(sys.path[0], filename)) as f:
@@ -41,7 +43,7 @@ def find_explicit_files(data_set_path, train=True):
                 file_categories.append(line.strip())
 
     # Now, for each of these filecategories, go in and grab their actual destinations
-    real_filepaths = []
+    real_filepaths = set()
 
     for file in file_categories:
         # outliers is an exception, so check if outliers first
@@ -50,12 +52,12 @@ def find_explicit_files(data_set_path, train=True):
         else:
             path = os.path.join(str(file[0]), file)
         
-        real_filepaths.append(os.path.join(orig_path, path))
+        real_filepaths.add(os.path.join(orig_path, path))
     
     return real_filepaths
 
 
-def get_images_by_object(data_set_path, train=True):
+def get_images_by_object(train=True):
     
     # Given objects_we_want.txt, we select images based on whether they contain relevant objects
 
@@ -66,7 +68,8 @@ def get_images_by_object(data_set_path, train=True):
         orig_path = os.path.join(sys.path[0], data_set_path, 'validation')
 
     object_names = []
-    filename = 'objects_we_want.txt'
+    # filename = 'objects_we_want.txt'
+    filename = 'test_object_selection.txt'
 
     # Get all the object names that we want
     with open(os.path.join(sys.path[0], filename)) as f:
@@ -77,18 +80,16 @@ def get_images_by_object(data_set_path, train=True):
     # Now, for each of these object names, go in and grab all image filepaths that contain that object
     real_filepaths = set()
 
-    # for name in object_names:
+    for name in object_names:
         
-    #     object_cols_that_match = matindex.object_image_matrix.ix[:,[x for x in object_image_matrix.index if name in x]]
+        object_cols_that_match = matindex.object_image_matrix.ix[:,[x for x in object_image_matrix.index if name in x]]
 
-    #     # if column of this object has a nonzero value, corresponding image should be added
-    #     whether_image_has_object = not (object_cols_that_match == 0)
-    #     containing_images = obj_col[whether_image_has_object].index.flatten()
-    #     full_image_paths = 
-    #     real_filepaths.add()
-        
-    # real_filepaths.append(os.path.join(orig_path, path))
-    
+        # if column of this object has a nonzero value, corresponding image should be added
+        whether_image_has_object = not (object_cols_that_match == 0)
+        containing_images = obj_col[whether_image_has_object].index.flatten()
+        for index, row in containing_images.iterrows():
+            real_filepaths.add(containing_images['folder'] + '/' + containing_images['filename'])
+            
     return real_filepaths
 
 
@@ -176,9 +177,10 @@ def main():
     data_set_path = os.path.join('ADE20K_2016_07_26', 'images')
 
     # Get the filepaths of the imgs that we want for train
-    filepaths = find_explicit_files(data_set_path)
+    # filepaths is a set
+    filepaths = find_explicit_files(data_set_path, train=True)
 
-    # filepaths.append(get_images_by_object(data_set_path))
+    filepaths.update(get_images_by_object(data_set_path, train=True))
     
     for filepath in filepaths:
         imgs, segs = get_files(filepath)
@@ -204,7 +206,12 @@ def main():
 
     print("Done loading resized Training data")
 
+    # Add images by explicit scene
     filepaths = find_explicit_files(os.path.join('ADE20K_2016_07_26', 'images'), train=False)
+
+    # Add images by object content
+    filepaths.update(get_images_by_object(data_set_path, train=True))
+
     # For the testing/validation set
     for filepath in filepaths:
         imgs, segs = get_files(filepath)
