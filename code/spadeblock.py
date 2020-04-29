@@ -3,13 +3,13 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.layers import Conv2D, BatchNormalization, LeakyReLU, Layer
 
-class SpadeBlock(tf.keras.Model): 
+class SpadeBlock(Layer): 
 	def __init__(self, fin, fout, use_bias=True, use_spectral=False): 
 		super(SpadeBlock, self).__init__()
 		self.use_spectral = use_spectral 
 
 		self.learned_shortcut = (fin != fout)
-		fmiddle = min(fin, fout)
+		fmiddle = tf.math.minimum(fin, fout)
 
 		self.conv0 = Conv2D(filters=fmiddle, kernel_size=3, strides=1, padding="SAME", use_bias=use_bias)
 		self.conv1 = Conv2D(filters=fout, kernel_size=3, strides=1, padding="SAME", use_bias=use_bias)
@@ -26,12 +26,12 @@ class SpadeBlock(tf.keras.Model):
 			skip_features = self.spectral_norm(w=self.shortcut(features, segmap))
 			dx = self.spectral_norm(w=self.conv0(self.actvn(self.spade0(features, segmap))))
 			dx = self.spectral_norm(w=self.conv1(self.actvn(self.spade1(dx, segmap))))
-			out = skip_features + dx
+			out = tf.math.add(skip_features, dx)
 		else: 
 			skip_features = self.shortcut(features, segmap)
 			dx = self.conv0(self.actvn(self.spade0(features, segmap)))
 			dx = self.conv1(self.actvn(self.spade1(dx, segmap)))
-			out = skip_features + dx
+			out = tf.math.add(skip_features, dx)
 		return out
 
 	def build(self, input_shape): 
