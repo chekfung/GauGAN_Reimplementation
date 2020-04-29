@@ -8,7 +8,11 @@ layers_of_onion = 10
 onion_layer = SpadeLayer(layers_of_onion)
 
 # Do stuff
-onion_layer(random, random)
+with tf.GradientTape() as tape: 
+	output = onion_layer(random, random)
+	loss = 5
 
-print(onion_layer.losses)
+grads = tape.gradient(loss, onion_layer.trainable_variables)
+
+print(onion_layer.trainable_parameters)
 
