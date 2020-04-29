@@ -35,7 +35,8 @@ class SpadeBlock(Layer):
 		return out
 
 	def build(self): 
-		return
+		def build(self, input_shape): 
+			super(SpadeBlock, self).build(input_shape)
 	
 	def shortcut(self, features, segmap): 
 		if self.learned_shortcut: 
