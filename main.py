@@ -136,7 +136,7 @@ def train(generator, discriminator, dataset_iterator, manager):
 		# Break batch up into images and segmaps 
 		images, seg_maps = batch
 
-		with tf.GradientTape() as generator_tape, tf.GradientTape() as discriminator_tape:
+		with tf.GradientTape(persistent=True) as generator_tape, tf.GradientTape(persistent=True) as discriminator_tape:
 			noise = tf.random.uniform((args.batch_size, args.z_dim), minval=-1, maxval=1)
 			
 			# calculate generator output
