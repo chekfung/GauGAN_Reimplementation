@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.layers import Conv2D, BatchNormalization, ReLU, Layer, Dense
 
-class MyDenseLayer(tf.keras.Model):
+class MyDenseLayer(Layer):
 	def __init__(self, num_outputs):
 		super(MyDenseLayer, self).__init__()
 		self.num_outputs = num_outputs
@@ -15,7 +15,7 @@ class MyDenseLayer(tf.keras.Model):
 	def build(self, input_shape):
 		self.fc.build(input_shape)
 		self._trainable_weights = self.fc.trainable_weights
-		super(MyDenselayer, self).build(input_shape)
+		super(MyDenseLayer, self).build(input_shape)
 		
 	
 	def compute_output_shape(self, input_shape):
