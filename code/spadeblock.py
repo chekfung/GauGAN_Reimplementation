@@ -75,7 +75,7 @@ class SpadeBlock(Layer):
 		sigma = tf.matmul(tf.matmul(v_hat, w), tf.transpose(u_hat))
 
 		with tf.control_dependencies([u.assign(u_hat)]):
-			w_norm = w / sigma
+			w_norm = tf.math.divide(w, sigma)
 			w_norm = tf.reshape(w_norm, w_shape)
 
 

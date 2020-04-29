@@ -15,7 +15,7 @@ class SpadeLayer(Layer):
 		super(SpadeLayer, self).build(input_shape)
 
 	def call(self, features, segmap):
-		norm = self.bn(features)
+		""" norm = self.bn(features)
 		
 		_, x_h, x_w, _ = list(norm.shape)
 		segmap_resized = tf.image.resize(segmap, size=(x_h, x_w), method="nearest")
@@ -24,4 +24,5 @@ class SpadeLayer(Layer):
 		result_a = self.conv2(seg_result)
 		result_b = self.conv3(seg_result)
 
-		return tf.math.add(tf.math.multiply(norm, tf.math.add(1, result_a)), result_b)
+		return tf.math.add(tf.math.multiply(norm, tf.math.add(1, result_a)), result_b) """
+		return self.conv3(features)
