@@ -137,8 +137,10 @@ def train(generator, discriminator, dataset_iterator, manager):
 		images, seg_maps = batch
 
 		with tf.GradientTape() as generator_tape, tf.GradientTape() as discriminator_tape:
+			noise = tf.random.uniform((args.batch_size, args.z_dim), minval=-1, maxval=1)
+			
 			# calculate generator output
-			gen_output = generator.call(seg_maps)
+			gen_output = generator.call(seg_maps, noise)
 			
 			# Get discriminator output for fake images and real images
 			disc_real = discriminator.call(images, seg_maps)
