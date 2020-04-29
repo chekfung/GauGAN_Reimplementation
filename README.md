@@ -9,7 +9,7 @@ get_landscape_img.py, which selects images and corresponding segmentation maps
 from the dataset as follows:
 - **explicit_cv_landscapes_final_project.txt** lists explicit scene categories
   to include 
-- **objects_we_want.txt lists words and phrases** (each phrase on a separate
+- **objects_we_want.txt** lists words and phrases (each phrase on a separate
   line) that describe objects, and all images that are known to contain
   at least one of the listed objects are included
 
