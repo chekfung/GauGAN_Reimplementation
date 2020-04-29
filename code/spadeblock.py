@@ -13,16 +13,19 @@ class SpadeBlock(Layer):
 
 		self.conv0 = Conv2D(filters=fmiddle, kernel_size=3, strides=1, padding="SAME", use_bias=use_bias)
 		self.conv1 = Conv2D(filters=fout, kernel_size=3, strides=1, padding="SAME", use_bias=use_bias)
-		if self.learned_shortcut: 
-			self.conv_s = Conv2D(filters=fout, kernel_size=1, strides=1, padding="SAME", use_bias=False)
+		self.conv_s = Conv2D(filters=fout, kernel_size=1, strides=1, padding="SAME", use_bias=False) # comment
+		""" if self.learned_shortcut: 
+			self.conv_s = Conv2D(filters=fout, kernel_size=1, strides=1, padding="SAME", use_bias=False) """
 		
 		self.spade0 = SpadeLayer(out_channels=fin)
 		self.spade1 = SpadeLayer(out_channels=fmiddle)
-		if self.learned_shortcut: 
-			self.spade_s = SpadeLayer(out_channels=fin)
+		self.spade_s = SpadeLayer(out_channels=fin) #comment 
+		""" if self.learned_shortcut: 
+			self.spade_s = SpadeLayer(out_channels=fin) """
 
 	def call(self, features, segmap): 
-		skip_features = self.shortcut(features, segmap)
+		#skip_features = self.shortcut(features, segmap)
+		skip_features = self.conv_s(self.spade_s(features, segmap))
 		dx = self.conv0(self.actvn(self.spade0(features, segmap)))
 		dx = self.conv1(self.actvn(self.spade1(dx, segmap)))
 		out = tf.math.add(skip_features, dx)
