@@ -1,7 +1,6 @@
 from code.spadelayer import SpadeLayer  
 from tensorflow.keras import Model
 import tensorflow as tf
-#import 
 
 class MOO(Model):
     def __init__(self):
