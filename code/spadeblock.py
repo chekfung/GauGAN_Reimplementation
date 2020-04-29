@@ -6,11 +6,11 @@ from tensorflow.keras.layers import Conv2D, BatchNormalization, LeakyReLU, Layer
 class SpadeBlock(Layer): 
 	def __init__(self, fin, fout, use_bias=True, use_spectral=False): 
 		super(SpadeBlock, self).__init__()
-		self.use_spectral = use_spectral 
+		#self.use_spectral = use_spectral 
 
-		self.learned_shortcut = (fin != fout)
-		fmiddle = tf.math.minimum(fin, fout)
-
+		#self.learned_shortcut = (fin != fout)
+		#fmiddle = tf.math.minimum(fin, fout)
+		fmiddle = fout
 		self.conv0 = Conv2D(filters=fmiddle, kernel_size=3, strides=1, padding="SAME", use_bias=use_bias)
 		self.conv1 = Conv2D(filters=fout, kernel_size=3, strides=1, padding="SAME", use_bias=use_bias)
 		self.conv_s = Conv2D(filters=fout, kernel_size=1, strides=1, padding="SAME", use_bias=False) # comment
@@ -25,10 +25,11 @@ class SpadeBlock(Layer):
 
 	def call(self, features, segmap): 
 		#skip_features = self.shortcut(features, segmap)
-		skip_features = self.conv_s(self.spade_s(features, segmap))
+		#skip_features = self.conv_s(self.spade_s(features, segmap))
 		dx = self.conv0(self.actvn(self.spade0(features, segmap)))
 		dx = self.conv1(self.actvn(self.spade1(dx, segmap)))
-		out = tf.math.add(skip_features, dx)
+		#out = tf.math.add(skip_features, dx)
+		out = dx
 		""" if self.use_spectral: 
 			skip_features = self.spectral_norm(w=self.shortcut(features, segmap))
 			dx = self.spectral_norm(w=self.conv0(self.actvn(self.spade0(features, segmap))))
