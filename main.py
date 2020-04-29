@@ -143,29 +143,29 @@ def train(generator, discriminator, dataset_iterator, manager):
 			gen_output = generator.call(seg_maps, noise)
 			
 			# Get discriminator output for fake images and real images
-			#disc_real = discriminator.call(images, seg_maps)
-			# disc_fake = discriminator.call(gen_output, seg_maps)
-			#disc_fake = disc_real
+			disc_real = discriminator.call(images, seg_maps)
+			disc_fake = discriminator.call(gen_output, seg_maps)
+			disc_fake = disc_real
 			
 			# calculate gen. loss and disc. loss
-			#g_loss = generator.loss(disc_fake)
+			g_loss = generator.loss(disc_fake)
 			g_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(tf.ones([3,1]), tf.zeros([3,1])))
-			#d_loss = discriminator.loss(disc_real, disc_fake)
+			d_loss = discriminator.loss(disc_real, disc_fake)
 			
 			# Update loss counters
-			#total_gen_loss += g_loss
-			#total_disc_loss += d_loss
+			total_gen_loss += g_loss
+			total_disc_loss += d_loss
 
 			""" print("Done!")
 			print(generator.trainable_variables, "\n\n\n\n") """
 
 		# get gradients
 		g_grad = generator_tape.gradient(g_loss, generator.trainable_variables)
-		#d_grad = discriminator_tape.gradient(d_loss, discriminator.trainable_variables)
+		d_grad = discriminator_tape.gradient(d_loss, discriminator.trainable_variables)
 			
 		generator.optimizer.apply_gradients(zip(g_grad, generator.trainable_variables))
 		print("MOOOOO", "\n\n\n\n")
-		#discriminator.optimizer.apply_gradients(zip(d_grad, discriminator.trainable_variables))
+		discriminator.optimizer.apply_gradients(zip(d_grad, discriminator.trainable_variables))
 		
 		# Save
 		if iteration % args.save_every == 0:
