@@ -25,9 +25,9 @@ class SPADEGenerator(tf.keras.Model):
         self.spade_layers.append(SpadeBlock(z_dim, int(z_dim / 2)))
         self.spade_layers.append(SpadeBlock(int(z_dim / 2), int(z_dim / 4)))
         self.spade_layers.append(SpadeBlock(int(z_dim / 4), int(z_dim / 8)))
-        #self.spade_layers.append(SpadeBlock(int(z_dim / 8), int(z_dim / 16)))
+        self.spade_layers.append(SpadeBlock(int(z_dim / 8), int(z_dim / 16)))
         # May need to change this 64.
-        self.conv_layer = tf.keras.layers.Conv2D(64, (3,3), activation='tanh')
+        self.conv_layer = tf.keras.layers.Conv2D(3, (3,3), activation='tanh')
         self.upsample = UpSampling2D()
         self.lrelu = LeakyReLU(alpha=0.2)
     
