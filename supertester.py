@@ -29,7 +29,7 @@ moo_obj = MyDenseLayer(10)
 with tf.GradientTape() as tape: 
 	output = moo_obj(random)
 	#output = onion_layer(random, random)
-	loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(tf.ones([3,1]), tf.zeros([3,1])))
+	loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(output, tf.zeros(output.shape)))
 
 	grads = tape.gradient(loss, moo_obj.trainable_variables)
 	print(grads)
