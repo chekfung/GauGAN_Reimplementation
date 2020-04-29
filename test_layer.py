@@ -11,7 +11,7 @@ class MyDenseLayer(tf.keras.Model):
   def call(self, input):
     return self.fc(input)
 
-#   def compute_output_shape(self, input_shape):
-#     shape = tf.TensorShape(input_shape).as_list()
-#     shape[-1] = self.num_outputs
-#     return tf.TensorShape(shape)
+  def compute_output_shape(self, input_shape):
+    shape = tf.TensorShape(input_shape).as_list()
+    shape[-1] = self.num_outputs
+    return tf.TensorShape(shape)
