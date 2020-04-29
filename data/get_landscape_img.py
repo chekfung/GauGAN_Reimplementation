@@ -33,8 +33,8 @@ def find_explicit_files(data_set_path, train=True):
         orig_path = os.path.join(sys.path[0], data_set_path, 'validation')
 
     file_categories = []
-    filename = 'explicit_cv_landscapes_final_project.txt'
-    #filename = 'test_explicit.txt'
+    # filename = 'explicit_cv_landscapes_final_project.txt'
+    filename = 'test_explicit.txt'
 
     # Get all the file categories that we want (Should be 47)
     with open(os.path.join(sys.path[0], filename)) as f:
@@ -54,6 +54,7 @@ def find_explicit_files(data_set_path, train=True):
         
         real_filepaths.add(os.path.join(orig_path, path))
     
+    print(real_filepaths)
     return real_filepaths
 
 
@@ -75,17 +76,22 @@ def get_images_by_object():
     real_filepaths = set()
 
     for name in object_names:
+
+        print("name is ", name)
         
         object_image_matrix = MATLABconversion.ADEIndex().object_image_matrix
 
-        object_cols_that_match = object_image_matrix.ix[:,[x for x in object_image_matrix.index if name in x]]
+        object_cols_that_match = object_image_matrix.iloc[:,[x for x in object_image_matrix.index if name in x]]
 
-        # if column of this object has a nonzero value, corresponding image should be added
-        whether_image_has_object = not (object_cols_that_match == 0)
-        containing_images = object_image_matrix[[x for x in object_image_matrix.index if (not object_image_matrix == 0)]].index.flatten()
-        for index, row in containing_images.iterrows():
-            real_filepaths.add(containing_images['folder'] + '/' + containing_images['filename'])
+        for (colName, colData) in object_cols_that_match.iteritems():
+            image_rows_to_add = object_image_matrix.loc[object_image_matrix[colName] != 0]
             
+            print("img rows to add are ", image_rows_to_add)
+
+            for index, row in image_rows_to_add.iterrows():
+                real_filepaths.add(image_rows_to_add.loc[index,'folder'] + '/' + image_rows_to_add.loc[index,'filename'])
+
+    print(real_filepaths)
     return real_filepaths
 
 
