@@ -1,4 +1,5 @@
 from code.spadelayer import SpadeLayer  
+import tensorflow as tf
 #import 
 
 random = tf.random.normal((1,1))
