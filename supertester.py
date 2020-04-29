@@ -23,7 +23,7 @@ random = tf.random.normal((4, 4))
 
 
 
-moo_obj = MOO()
+moo_obj = MyDenseLayer(10)
 
 # Do stuff
 with tf.GradientTape() as tape: 
