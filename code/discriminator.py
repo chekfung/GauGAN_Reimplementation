@@ -53,7 +53,7 @@ class Discriminator(Model):
     concatenating "avoids disparate statistics in fake and real images". We have
     opted to skip this and return if we have time
     """
-    def loss(real_output, fake_output):
+    def loss(self, real_output, fake_output):
         real_loss = tf.math.multiply(-1, tf.reduce_mean(tf.minimum(tf.math.subtract(real_output, 1), 0)))
         fake_loss = tf.math.multiply(-1, tf.reduce_mean(tf.minimum(tf.math.multiply(-1, tf.math.subtract(fake_output, 1), 0))))
 
