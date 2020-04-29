@@ -7,6 +7,8 @@ class MOO(Model):
     def __init__(self):
         super(MOO, self).__init__()
         self.layer = SpadeBlock(4,4)
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate = 0.0001, beta_1 = 0.5, beta_2 = 0.999)
+
 
     def call(self, img, segmap):
         return self.layer(img, segmap)
@@ -29,6 +31,7 @@ with tf.GradientTape() as tape:
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(tf.ones([3,1]), tf.zeros([3,1])))
 
 grads = tape.gradient(loss, moo_obj.trainable_variables)
+moo_obj.optimizer.apply_gradients(zip(grads, moo_obj.trainable_variables))
 
 print(moo_obj.trainable_variables)
 print("Ouch")
