@@ -5,10 +5,10 @@ from tensorflow.keras.layers import Conv2D, BatchNormalization, ReLU, Layer
 class SpadeLayer(Layer):
 	def __init__(self, out_channels, use_bias=True, hidden_channels=128):
 		super(SpadeLayer, self).__init__()
-		self.bn = BatchNormalization()
+		""" self.bn = BatchNormalization()
 		self.conv1 = Conv2D(filters=hidden_channels, kernel_size=5, strides=1, padding="SAME", use_bias=use_bias)
 		self.relu = ReLU()
-		self.conv2 = Conv2D(filters=out_channels, kernel_size=5, strides=1, padding="SAME", use_bias=use_bias)
+		self.conv2 = Conv2D(filters=out_channels, kernel_size=5, strides=1, padding="SAME", use_bias=use_bias) """
 		self.conv3 = Conv2D(filters=out_channels, kernel_size=5, strides=1, padding="SAME", use_bias=use_bias)
 
 	def build(self, input_shape): 
