@@ -31,7 +31,7 @@ with tf.GradientTape() as tape:
     #output = onion_layer(random, random)
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(tf.ones([3,1]), tf.zeros([3,1])))
 
-grads = tape.gradient(loss, moo_obj.trainable_variables)
+	grads = tape.gradient(loss, moo_obj.trainable_variables)
 moo_obj.optimizer.apply_gradients(zip(grads, moo_obj.trainable_variables))
 
 print(moo_obj.trainable_variables)
