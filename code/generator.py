@@ -3,8 +3,8 @@ import tensorflow as tf
 from spadeblock import SpadeBlock
 
 class SPADEGenerator(tf.keras.Model):
-    def __init__(self, beta1=0.5, beta2=0.999, learning_rate=0.0001, batch_size=32, z_dim=256, \
-        img_w=160, img_h=120):
+    def __init__(self, beta1=0.5, beta2=0.999, learning_rate=0.0001, batch_size=32, z_dim=64, \
+        img_w=40, img_h=30):
         super(SPADEGenerator, self).__init__()
         
         self.beta1 = beta1
@@ -18,19 +18,19 @@ class SPADEGenerator(tf.keras.Model):
         self.image_width = img_w
         self.image_height = img_h
         self.dense = tf.keras.layers.Dense(self.image_height*self.image_width*self.num_channels)
-        self.spade_layers.append(SpadeBlock(z_dim, z_dim))
-        self.spade_layers.append(SpadeBlock(z_dim, z_dim))
-        self.spade_layers.append(SpadeBlock(z_dim, z_dim))
-        self.spade_layers.append(SpadeBlock(z_dim, (z_dim / 2)))
-        self.spade_layers.append(SpadeBlock((z_dim / 2), (z_dim / 4)))
-        self.spade_layers.append(SpadeBlock((z_dim / 4), (z_dim / 8)))
-        self.spade_layers.append(SpadeBlock((z_dim / 8), (z_dim / 16)))
+        #self.spade_layers.append(SpadeBlock(z_dim, z_dim))
+        #self.spade_layers.append(SpadeBlock(z_dim, z_dim))
+        #self.spade_layers.append(SpadeBlock(z_dim, z_dim))
+        self.spade_layers.append(SpadeBlock(z_dim, int(z_dim / 2)))
+        self.spade_layers.append(SpadeBlock(int(z_dim / 2), int(z_dim / 4)))
+        self.spade_layers.append(SpadeBlock(int(z_dim / 4), int(z_dim / 8)))
+        #self.spade_layers.append(SpadeBlock(int(z_dim / 8), int(z_dim / 16)))
         # May need to change this 64.
         self.conv_layer = tf.keras.layers.Conv2D(64, (3,3), activation='tanh')
     
     def call(self, images):
         batch_size = np.shape(images)[0]
-        noise = np.random.normal(loc=0, scale=1, size=(batch_size, z_dim))
+        noise = np.random.normal(loc=0, scale=1, size=(batch_size, self.num_channels))
         result_dense = self.dense(noise)
         reshaped = tf.reshape(result_dense, [batch_size, self.image_width, self.image_height, self.num_channels])
         result = self.spade_layers[0](reshaped, images)
