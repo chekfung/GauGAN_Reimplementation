@@ -68,7 +68,14 @@ class ADEIndex():
   # putting the columns together
   image_index = pd.concat([filename_col, folder_col, typeset_col, scene_col], axis=1)
 
+  image_index = image_index.set_index('filename')
+  # print(image_index.index)
+  # print(image_index)
+  # print(image_index['ADE_train_00011093.jpg'])
+
   # image_index.to_csv("csvIndexes/image_index.csv")
+
+  # print(image_index['ADE_train_00011093.jpg'])
 
   # -------
 
@@ -96,6 +103,11 @@ class ADEIndex():
   object_image_matrix = pd.DataFrame(matindex['objectPresence'].T, 
                                     columns=object_name_list['objectnames'],
                                     index=filename_col['filename'])
+
+  # object_cols_that_match = object_image_matrix.loc[:,[x for x in object_image_matrix.columns if 'vcr' in x]]
+  # for (colName, colData) in object_cols_that_match.iteritems():
+  #   image_rows_to_add = object_image_matrix.loc[object_image_matrix[colName] != 0]
+  #   print(image_rows_to_add)
 
   # Function to produce all 3 CSV files
   # THE LAST ONE IS KINDA BIG (for a CSV) - around 300 MB
