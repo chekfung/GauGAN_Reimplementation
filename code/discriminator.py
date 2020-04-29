@@ -2,7 +2,6 @@ import tensorflow as tf
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense, Flatten, Conv2D, BatchNormalization, LeakyReLU, Reshape, Conv2DTranspose 
 from tensorflow_addons.layers import InstanceNormalization
-import numpy as np
 
 
 # forward is call
@@ -55,8 +54,8 @@ class Discriminator(Model):
     concatenating "avoids disparate statistics in fake and real images". We have
     opted to skip this and return if we have time
     """
-    def loss(self, real_output, fake_output):
-        real_loss = -tf.reduce_mean(tf.minimum(real_output - 1, 0))
-        fake_loss = -tf.reduce_mean(tf.minimum(-fake_output - 1, 0))
+    def loss(real_output, fake_output):
+        real_loss = tf.math.multiply(-1, tf.reduce_mean(tf.minimum(tf.math.subtract(real_output, 1), 0)))
+        fake_loss = tf.math.multiply(-1, tf.reduce_mean(tf.minimum(tf.math.multiply(-1, tf.math.subtract(fake_output, 1), 0))))
 
-        return tf.reduce_mean(real_loss + fake_loss)
+        return tf.reduce_mean(tf.math.add(real_loss, fake_loss))
