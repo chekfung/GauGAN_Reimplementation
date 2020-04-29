@@ -42,6 +42,8 @@ class Discriminator(Model):
         # Final Convolutional Layer, as like PatchGAN implementation
         self.model.add(Conv2D(filters=1, kernel_size=KERNEL_SIZE, strides=1, padding="SAME"))
 
+        self.bce = tf.keras.losses.BinaryCrossentropy()
+
 
     @tf.function
     def call(self, inputs, segmaps):
@@ -54,7 +56,10 @@ class Discriminator(Model):
     opted to skip this and return if we have time
     """
     def loss(self, real_output, fake_output):
-        real_loss = tf.math.multiply(-1, tf.reduce_mean(tf.minimum(tf.math.subtract(real_output, 1), 0)))
+        """ real_loss = tf.math.multiply(-1, tf.reduce_mean(tf.minimum(tf.math.subtract(real_output, 1), 0)))
         fake_loss = tf.math.multiply(-1, tf.reduce_mean(tf.minimum(tf.math.multiply(-1, tf.math.subtract(fake_output, 1)), 0)))
 
-        return tf.reduce_mean(tf.math.add(real_loss, fake_loss))
+        return tf.reduce_mean(tf.math.add(real_loss, fake_loss)) """
+        loss1 = self.bce(tf.ones_like(real_output), real_output)
+        loss2 = self.bce(tf.zeros_like(fake_output), fake_output)
+        return loss1 + loss2
