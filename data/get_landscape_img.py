@@ -162,8 +162,8 @@ def remove_parts_two(dir):
 
 def main():        
     # Resize parameters
-    HEIGHT = 120
-    WIDTH = 160
+    HEIGHT = 30
+    WIDTH = 40
     # Create the file directories to house the new resized imgs
     file_dir = 'landscape_data'
     train, test = make_save_dir(file_dir)
@@ -176,7 +176,7 @@ def main():
     # filepaths is a set
     filepaths = find_explicit_files(data_set_path, train=True)
 
-    filepaths.update(get_images_by_object())
+    #filepaths.update(get_images_by_object())
     
     for filepath in filepaths:
         imgs, segs = get_files(filepath)
@@ -206,7 +206,7 @@ def main():
     filepaths = find_explicit_files(os.path.join('ADE20K_2016_07_26', 'images'), train=False)
 
     # Add images by object content
-    filepaths.update(get_images_by_object())
+    #filepaths.update(get_images_by_object())
 
     # For the testing/validation set
     for filepath in filepaths:
