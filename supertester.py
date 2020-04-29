@@ -6,7 +6,7 @@ import tensorflow as tf
 class MOO(Model):
     def __init__(self):
         super(MOO, self).__init__()
-        self.layer = SpadeBlock(4,4)
+        self.layer = SpadeLayer(4,4)
         self.optimizer = tf.keras.optimizers.Adam(learning_rate = 0.0001, beta_1 = 0.5, beta_2 = 0.999)
 
 
