@@ -34,7 +34,7 @@ def find_explicit_files(data_set_path, train=True):
 
     file_categories = []
     # filename = 'explicit_cv_landscapes_final_project.txt'
-    filename = 'text_explicit.txt'
+    filename = 'test_explicit.txt'
 
     # Get all the file categories that we want (Should be 47)
     with open(os.path.join(sys.path[0], filename)) as f:
@@ -57,15 +57,9 @@ def find_explicit_files(data_set_path, train=True):
     return real_filepaths
 
 
-def get_images_by_object(train=True):
+def get_images_by_object():
     
     # Given objects_we_want.txt, we select images based on whether they contain relevant objects
-
-    if train:
-        orig_path = os.path.join(sys.path[0], data_set_path, 'training')
-        print(orig_path)
-    else:
-        orig_path = os.path.join(sys.path[0], data_set_path, 'validation')
 
     object_names = []
     # filename = 'objects_we_want.txt'
@@ -180,7 +174,7 @@ def main():
     # filepaths is a set
     filepaths = find_explicit_files(data_set_path, train=True)
 
-    filepaths.update(get_images_by_object(data_set_path, train=True))
+    # filepaths.update(get_images_by_object())
     
     for filepath in filepaths:
         imgs, segs = get_files(filepath)
@@ -210,7 +204,7 @@ def main():
     filepaths = find_explicit_files(os.path.join('ADE20K_2016_07_26', 'images'), train=False)
 
     # Add images by object content
-    filepaths.update(get_images_by_object(data_set_path, train=True))
+    # filepaths.update(get_images_by_object())
 
     # For the testing/validation set
     for filepath in filepaths:

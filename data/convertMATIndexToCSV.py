@@ -35,11 +35,11 @@ class ADEIndex():
 
   print("There are ", num_examples, " images in the dataset")
 
-  print("Here's a list of the attributes in the MATLAB data:")
+  # print("Here's a list of the attributes in the MATLAB data:")
 
-  for name_i in matindex.dtype.names:
-    print("Attribute: ", name_i)
-    print("Dimensions of ", name_i, ": ", matindex[name_i].shape)
+  # for name_i in matindex.dtype.names:
+  #   print("Attribute: ", name_i)
+  #   print("Dimensions of ", name_i, ": ", matindex[name_i].shape)
 
   # --------
 
@@ -67,8 +67,6 @@ class ADEIndex():
 
   # putting the columns together
   image_index = pd.concat([filename_col, folder_col, typeset_col, scene_col], axis=1)
-
-  print(image_index['folder'])
 
   # image_index.to_csv("csvIndexes/image_index.csv")
 
