@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from spadeblock import SpadeBlock
+from code.spadeblock import SpadeBlock
 from tensorflow.keras.layers import UpSampling2D
 
 class SPADEGenerator(tf.keras.Model):
