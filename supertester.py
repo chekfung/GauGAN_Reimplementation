@@ -2,7 +2,7 @@ from code.spadelayer import SpadeLayer
 import tensorflow as tf
 #import 
 
-random = tf.random.normal((1,1))
+random = tf.random.normal((4, 4, 4, 4))
 
 layers_of_onion = 10
 onion_layer = SpadeLayer(layers_of_onion)
