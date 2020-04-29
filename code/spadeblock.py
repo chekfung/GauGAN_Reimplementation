@@ -22,12 +22,14 @@ class SpadeBlock(Layer):
 		self.spade_s = SpadeLayer(out_channels=fin) #comment 
 		""" if self.learned_shortcut: 
 			self.spade_s = SpadeLayer(out_channels=fin) """
+		self.lrelu1 = LeakyReLU(alpha=0.2)
+		self.lrelu2 = LeakyReLU(alpha=0.2)
 
 	def call(self, features, segmap): 
 		#skip_features = self.shortcut(features, segmap)
 		#skip_features = self.conv_s(self.spade_s(features, segmap))
-		dx = self.conv0(self.actvn(self.spade0(features, segmap)))
-		dx = self.conv1(self.actvn(self.spade1(dx, segmap)))
+		dx = self.conv0(self.lrelu1(self.spade0(features, segmap)))
+		dx = self.conv1(self.lrelu2(self.spade1(dx, segmap)))
 		#out = tf.math.add(skip_features, dx)
 		out = dx
 		""" if self.use_spectral: 
