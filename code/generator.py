@@ -30,11 +30,9 @@ class SPADEGenerator(tf.keras.Model):
         self.conv_layer = tf.keras.layers.Conv2D(64, (3,3), activation='tanh')
         self.upsample = UpSampling2D()
     
-    def call(self, images):
-        batch_size = np.shape(images)[0]
-        noise = np.random.normal(loc=0, scale=1, size=(batch_size, self.num_channels))
+    def call(self, images, noise):
         result_dense = self.dense(noise)
-        reshaped = tf.reshape(result_dense, [batch_size, self.image_width, self.image_height, self.num_channels])
+        reshaped = tf.reshape(result_dense, [-1, self.image_width, self.image_height, self.num_channels])
         result = self.spade_layers[0](reshaped, images)
         for layer in self.spade_layers[1:]:
             result = self.upsample(result)
