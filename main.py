@@ -137,8 +137,6 @@ def train(generator, discriminator, dataset_iterator, manager):
 		images, seg_maps = batch
 
 		with tf.GradientTape() as generator_tape, tf.GradientTape() as discriminator_tape:
-			generator_tape.watch(generator.trainable_variables)
-			discriminator_tape.watch(discriminator.trainable_variables)
 			# calculate generator output
 			gen_output = generator.call(seg_maps)
 			
