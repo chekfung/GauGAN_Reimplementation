@@ -47,6 +47,8 @@ class Discriminator(Model):
 
     @tf.function
     def call(self, inputs, segmaps):
+        print("SEGMAP: ", segmaps.shape)
+        print("inputs:", inputs.shape)
         x = tf.concat([segmaps, inputs], axis=-1)
         return self.model(x)
 
