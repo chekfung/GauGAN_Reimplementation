@@ -1,11 +1,12 @@
 from code.spadelayer import SpadeLayer  
+from code.spadeblock import SpadeBlock
 from tensorflow.keras import Model
 import tensorflow as tf
 
 class MOO(Model):
     def __init__(self):
         super(MOO, self).__init__()
-        self.layer = SpadeLayer(10)
+        self.layer = SpadeBlock(4,4)
 
     def call(self, img, segmap):
         return self.layer(img, segmap)
@@ -26,4 +27,5 @@ with tf.GradientTape() as tape:
 grads = tape.gradient(loss, moo_obj.trainable_variables)
 
 print(moo_obj.trainable_variables)
+print("Ouch")
 
