@@ -10,7 +10,7 @@ MODELED AFTER Brown CSCI 1470 DEEP LEARNING GAN ASSIGNMENT 7 HOMEWORK
 
 # Sets up tensorflow graph to load images
 # (This is the version using new-style tf.data API)
-def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=1, drop_remainder=True):
+def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=10, drop_remainder=True):
     """
     Given a directory and a batch size, the following method returns a dataset iterator that can be queried for 
     a batch of images
@@ -96,7 +96,7 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
         # args are string tensor, start index, and length
         image_name_without_ext = tf.strings.substr(segmap_path, 0, segmap_path_len - 8)
 
-        image_path = tf.strings.join([image_name_without_ext, '.png'])
+        image_path = tf.strings.join([image_name_without_ext, '.jpg'])
 
         # image_path = segmap_path[:-8] + '.png'
         # image_path = 'a'
@@ -122,7 +122,7 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
     dataset = dataset.shuffle(buffer_size=shuffle_buffer_size)
 
     # Load and process images (in parallel)
-    dataset = dataset.map(map_func=get_image_segmap_pair, num_parallel_calls=1)
+    dataset = dataset.map(map_func=get_image_segmap_pair, num_parallel_calls=n_threads)
 
     # Create batch, dropping the final one which has less than batch_size elements and finally set to reshuffle
     # the dataset at the end of each iteration
