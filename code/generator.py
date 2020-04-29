@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from code.spadeblock import SpadeBlock
-from tensorflow.keras.layers import UpSampling2D
+from tensorflow.keras.layers import UpSampling2D, LeakyReLU
 
 class SPADEGenerator(tf.keras.Model):
     def __init__(self, beta1=0.5, beta2=0.999, learning_rate=0.0001, batch_size=32, z_dim=64, \
@@ -29,6 +29,8 @@ class SPADEGenerator(tf.keras.Model):
         # May need to change this 64.
         self.conv_layer = tf.keras.layers.Conv2D(64, (3,3), activation='tanh')
         self.upsample = UpSampling2D()
+        self.lrelu = LeakyReLU(alpha=0.2)
+        self.bce = tf.keras.losses.BinaryCrossentropy()
     
     def call(self, images, noise):
         result_dense = self.dense(noise)
@@ -37,13 +39,13 @@ class SPADEGenerator(tf.keras.Model):
         for layer in self.spade_layers[1:]:
             result = self.upsample(result)
             result = layer(result, images)
-        result = tf.nn.leaky_relu(result)
+        result = self.lrelu(result)
         result = self.conv_layer(result)
         return result
     
     def loss(self,fake_logits):
         # Only hinge loss for now--can add extra losses later
-        return tf.keras.losses.hinge(tf.zeros_like(fake_logits), fake_logits)
+        return self.bce(tf.zeros_like(fake_logits), fake_logits)
     
 """     @tf.function
     def upsample(self, batch_inputs):
