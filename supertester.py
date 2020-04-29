@@ -14,5 +14,5 @@ with tf.GradientTape() as tape:
 
 grads = tape.gradient(loss, onion_layer.trainable_variables)
 
-print(onion_layer.trainable_parameters)
+print(onion_layer.trainable_variables)
 
