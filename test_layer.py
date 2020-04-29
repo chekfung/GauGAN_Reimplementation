@@ -7,6 +7,7 @@ class MyDenseLayer(tf.keras.Model):
     super(MyDenseLayer, self).__init__()
     self.num_outputs = num_outputs
     self.fc = tf.keras.layers.Dense(num_outputs)
+	self.optimizer = self.optimizer = tf.keras.optimizers.Adam(learning_rate = 0.0001, beta_1 = 0.5, beta_2 = 0.999)
 
   def call(self, input):
     return self.fc(input)
