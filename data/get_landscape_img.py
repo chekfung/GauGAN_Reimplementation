@@ -113,7 +113,6 @@ def get_explicit_files(file_path):
 
     Params
     - file_path, one filepath representing folder that contains imgs.
-    
 
     Returns
 
