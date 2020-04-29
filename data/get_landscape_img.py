@@ -33,8 +33,8 @@ def find_explicit_files(data_set_path, train=True):
         orig_path = os.path.join(sys.path[0], data_set_path, 'validation')
 
     file_categories = []
-    # filename = 'explicit_cv_landscapes_final_project.txt'
-    filename = 'test_explicit.txt'
+    filename = 'explicit_cv_landscapes_final_project.txt'
+    #filename = 'test_explicit.txt'
 
     # Get all the file categories that we want (Should be 47)
     with open(os.path.join(sys.path[0], filename)) as f:
