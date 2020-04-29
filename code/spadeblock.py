@@ -22,7 +22,11 @@ class SpadeBlock(Layer):
 			self.spade_s = SpadeLayer(out_channels=fin)
 
 	def call(self, features, segmap): 
-		if self.use_spectral: 
+		skip_features = self.shortcut(features, segmap)
+		dx = self.conv0(self.actvn(self.spade0(features, segmap)))
+		dx = self.conv1(self.actvn(self.spade1(dx, segmap)))
+		out = tf.math.add(skip_features, dx)
+		""" if self.use_spectral: 
 			skip_features = self.spectral_norm(w=self.shortcut(features, segmap))
 			dx = self.spectral_norm(w=self.conv0(self.actvn(self.spade0(features, segmap))))
 			dx = self.spectral_norm(w=self.conv1(self.actvn(self.spade1(dx, segmap))))
@@ -31,7 +35,7 @@ class SpadeBlock(Layer):
 			skip_features = self.shortcut(features, segmap)
 			dx = self.conv0(self.actvn(self.spade0(features, segmap)))
 			dx = self.conv1(self.actvn(self.spade1(dx, segmap)))
-			out = tf.math.add(skip_features, dx)
+			out = tf.math.add(skip_features, dx) """
 		return out
 
 	def build(self, input_shape): 
