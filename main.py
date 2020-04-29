@@ -143,6 +143,7 @@ def train(generator, discriminator, dataset_iterator, manager):
 			gen_output = generator.call(seg_maps, noise)
 			
 			# Get discriminator output for fake images and real images
+			print("IMAGES SHAPE IN TRAIN: ", images.shape)
 			disc_real = discriminator.call(images, seg_maps)
 			disc_fake = discriminator.call(gen_output, seg_maps)
 			disc_fake = disc_real
