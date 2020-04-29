@@ -12,10 +12,10 @@ class MyDenseLayer(Layer):
 	def call(self, input):
 		return self.fc(input)
 	
-	def build(self, input_shape):
-		self.fc.build(input_shape)
-		self._trainable_weights = self.fc.trainable_weights
-		super(MyDenseLayer, self).build(input_shape)
+	# def build(self, input_shape):
+	# 	self.fc.build(input_shape)
+	# 	self._trainable_weights = self.fc.trainable_weights
+	# 	super(MyDenseLayer, self).build(input_shape)
 		
 	
 	# def compute_output_shape(self, input_shape):
