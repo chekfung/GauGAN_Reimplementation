@@ -55,6 +55,6 @@ class Discriminator(Model):
     """
     def loss(self, real_output, fake_output):
         real_loss = tf.math.multiply(-1, tf.reduce_mean(tf.minimum(tf.math.subtract(real_output, 1), 0)))
-        fake_loss = tf.math.multiply(-1, tf.reduce_mean(tf.minimum(tf.math.multiply(-1, tf.math.subtract(fake_output, 1), 0))))
+        fake_loss = tf.math.multiply(-1, tf.reduce_mean(tf.minimum(tf.math.multiply(-1, tf.math.subtract(fake_output, 1)), 0)))
 
         return tf.reduce_mean(tf.math.add(real_loss, fake_loss))
