@@ -153,6 +153,8 @@ def train(generator, discriminator, dataset_iterator, manager):
 			total_gen_loss += g_loss
 			total_disc_loss += d_loss
 
+			print("Done!")
+
 		# get gradients
 		g_grad = generator_tape.gradient(g_loss, generator.trainable_variables)
 		d_grad = discriminator_tape.gradient(d_loss, discriminator.trainable_variables)
