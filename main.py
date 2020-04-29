@@ -137,7 +137,6 @@ def train(generator, discriminator, dataset_iterator, manager):
 		images, seg_maps = batch
 
 		with tf.GradientTape() as generator_tape, tf.GradientTape() as discriminator_tape:
-
 			# calculate generator output
 			gen_output = generator.call(seg_maps)
 			
@@ -154,9 +153,12 @@ def train(generator, discriminator, dataset_iterator, manager):
 			total_gen_loss += g_loss
 			total_disc_loss += d_loss
 
-			# get gradients
-			g_grad = generator_tape.gradient(g_loss, generator.trainable_variables)
-			d_grad = discriminator_tape.gradient(d_loss, discriminator.trainable_variables)
+			print("Done!")
+			print(generator.trainable_variables, "\n\n\n\n")
+
+		# get gradients
+		g_grad = generator_tape.gradient(g_loss, generator.trainable_variables)
+		d_grad = discriminator_tape.gradient(d_loss, discriminator.trainable_variables)
 			
 		generator.optimizer.apply_gradients(zip(g_grad, generator.trainable_variables))
 		discriminator.optimizer.apply_gradients(zip(d_grad, discriminator.trainable_variables))

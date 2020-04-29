@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.layers import Conv2D, BatchNormalization, ReLU, Layer
 
-class SpadeLayer(Layer):
+class SpadeLayer(tf.keras.Model):
 	def __init__(self, out_channels, use_bias=True, hidden_channels=128):
 		super(SpadeLayer, self).__init__()
 		self.bn = BatchNormalization()
@@ -10,6 +10,9 @@ class SpadeLayer(Layer):
 		self.relu = ReLU()
 		self.conv2 = Conv2D(filters=out_channels, kernel_size=5, strides=1, padding="SAME", use_bias=use_bias)
 		self.conv3 = Conv2D(filters=out_channels, kernel_size=5, strides=1, padding="SAME", use_bias=use_bias)
+
+	def build(self, input_shape): 
+		super(SpadeLayer, self).build(input_shape)
 
 	def call(self, features, segmap):
 		norm = self.bn(features)

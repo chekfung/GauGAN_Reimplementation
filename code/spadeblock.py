@@ -3,7 +3,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.layers import Conv2D, BatchNormalization, LeakyReLU, Layer
 
-class SpadeBlock(Layer): 
+class SpadeBlock(tf.keras.Model): 
 	def __init__(self, fin, fout, use_bias=True, use_spectral=False): 
 		super(SpadeBlock, self).__init__()
 		self.use_spectral = use_spectral 
@@ -33,6 +33,9 @@ class SpadeBlock(Layer):
 			dx = self.conv1(self.actvn(self.spade1(dx, segmap)))
 			out = skip_features + dx
 		return out
+
+	def build(self, input_shape): 
+		super(SpadeBlock, self).build(input_shape)
 	
 	def shortcut(self, features, segmap): 
 		if self.learned_shortcut: 
