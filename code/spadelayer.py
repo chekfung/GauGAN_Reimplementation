@@ -11,6 +11,9 @@ class SpadeLayer(Layer):
 		self.conv2 = Conv2D(filters=out_channels, kernel_size=5, strides=1, padding="SAME", use_bias=use_bias)
 		self.conv3 = Conv2D(filters=out_channels, kernel_size=5, strides=1, padding="SAME", use_bias=use_bias)
 
+	def build(self): 
+		return 
+
 	def call(self, features, segmap):
 		norm = self.bn(features)
 		

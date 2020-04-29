@@ -33,6 +33,9 @@ class SpadeBlock(Layer):
 			dx = self.conv1(self.actvn(self.spade1(dx, segmap)))
 			out = skip_features + dx
 		return out
+
+	def build(self): 
+		return
 	
 	def shortcut(self, features, segmap): 
 		if self.learned_shortcut: 
