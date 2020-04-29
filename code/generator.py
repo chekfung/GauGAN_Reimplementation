@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from spadeblock import SpadeBlock
+from tensorflow.keras.layers import UpSampling2D
 
 class SPADEGenerator(tf.keras.Model):
     def __init__(self, beta1=0.5, beta2=0.999, learning_rate=0.0001, batch_size=32, z_dim=64, \
@@ -27,6 +28,7 @@ class SPADEGenerator(tf.keras.Model):
         #self.spade_layers.append(SpadeBlock(int(z_dim / 8), int(z_dim / 16)))
         # May need to change this 64.
         self.conv_layer = tf.keras.layers.Conv2D(64, (3,3), activation='tanh')
+        self.upsample = UpSampling2D()
     
     def call(self, images):
         batch_size = np.shape(images)[0]
@@ -35,7 +37,7 @@ class SPADEGenerator(tf.keras.Model):
         reshaped = tf.reshape(result_dense, [batch_size, self.image_width, self.image_height, self.num_channels])
         result = self.spade_layers[0](reshaped, images)
         for layer in self.spade_layers[1:]:
-            result = tf.image.resize(result, [2*np.shape(result)[1], 2*np.shape(result)[2]])
+            result = self.upsample(result)
             result = layer(result, images)
         result = tf.nn.leaky_relu(result)
         result = self.conv_layer(result)
@@ -45,6 +47,6 @@ class SPADEGenerator(tf.keras.Model):
         # Only hinge loss for now--can add extra losses later
         return tf.keras.losses.hinge(tf.zeros_like(fake_logits), fake_logits)
     
-    @tf.function
+"""     @tf.function
     def upsample(self, batch_inputs):
-        return tf.image.resize(batch_inputs, [2*np.shape(batch_inputs)[1], 2*np.shape(batch_inputs)[2]])
+        return tf.image.resize(batch_inputs, [2*np.shape(batch_inputs)[1], 2*np.shape(batch_inputs)[2]]) """
