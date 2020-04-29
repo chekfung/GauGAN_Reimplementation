@@ -30,7 +30,7 @@ class SPADEGenerator(tf.keras.Model):
     
     def call(self, images):
         batch_size = np.shape(images)[0]
-        noise = np.random.normal(loc=0, scale=1, size=(batch_size, z_dim))
+        noise = np.random.normal(loc=0, scale=1, size=(batch_size, self.num_channels))
         result_dense = self.dense(noise)
         reshaped = tf.reshape(result_dense, [batch_size, self.image_width, self.image_height, self.num_channels])
         result = self.spade_layers[0](reshaped, images)
