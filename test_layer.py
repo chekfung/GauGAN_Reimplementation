@@ -11,11 +11,11 @@ class MyDenseLayer(tf.keras.Model):
 	
 	def call(self, input):
 		return self.fc(input)
-    
-    def build(self, input_shape):
-        self.fc.build(input_shape)
-        self._trainable_weights = self.fc.trainable_weights
-        super(MyDenselayer, self).build(input_shape)
+	
+	def build(self, input_shape):
+		self.fc.build(input_shape)
+		self._trainable_weights = self.fc.trainable_weights
+		super(MyDenselayer, self).build(input_shape)
 		
 	
 	def compute_output_shape(self, input_shape):
@@ -25,15 +25,15 @@ class MyDenseLayer(tf.keras.Model):
 
 
 # class mylayer(tf.keras.layers.Layer):
-#     def __init__(self, num_outputs, num_outputs2):
-#         self.num_outputs = num_outputs
-#         super(mylayer, self).__init__()
+#	 def __init__(self, num_outputs, num_outputs2):
+#		 self.num_outputs = num_outputs
+#		 super(mylayer, self).__init__()
 
-#     def build(self, input_shape):
-#         self.fc = tf.keras.layers.Dense(self.num_outputs)
-#         self.fc.build(input_shape)
-#         self._trainable_weights = self.fc.trainable_weights
-#         super(mylayer, self).build(input_shape)
+#	 def build(self, input_shape):
+#		 self.fc = tf.keras.layers.Dense(self.num_outputs)
+#		 self.fc.build(input_shape)
+#		 self._trainable_weights = self.fc.trainable_weights
+#		 super(mylayer, self).build(input_shape)
 
-#     def call(self, input):
-#         return self.fc(input)
+#	 def call(self, input):
+#		 return self.fc(input)
