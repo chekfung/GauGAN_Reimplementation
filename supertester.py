@@ -14,8 +14,12 @@ class MOO(Model):
 
 random = tf.random.normal((4, 4, 4, 4))
 
-layers_of_onion = 10
-onion_layer = SpadeLayer(layers_of_onion)
+##layers_of_onion = 10
+#onion_layer = SpadeLayer(layers_of_onion)
+
+
+
+
 moo_obj = MOO()
 
 # Do stuff
