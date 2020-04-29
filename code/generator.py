@@ -35,7 +35,7 @@ class SPADEGenerator(tf.keras.Model):
         reshaped = tf.reshape(result_dense, [batch_size, self.image_width, self.image_height, self.num_channels])
         result = self.spade_layers[0](reshaped, images)
         for layer in self.spade_layers[1:]:
-            result = upsample(result)
+            result = self.upsample(result)
             result = layer(result, images)
         result = tf.nn.leaky_relu(result)
         result = self.conv_layer(result)
@@ -45,5 +45,6 @@ class SPADEGenerator(tf.keras.Model):
         # Only hinge loss for now--can add extra losses later
         return tf.keras.losses.hinge(tf.zeros_like(fake_logits), fake_logits)
     
-def upsample(batch_inputs):
-    return tf.image.resize(batch_inputs, [2*np.shape(batch_inputs)[1], 2*np.shape(batch_inputs)[2]])
+    @tf.function
+    def upsample(self, batch_inputs):
+        return tf.image.resize(batch_inputs, [2*np.shape(batch_inputs)[1], 2*np.shape(batch_inputs)[2]])
