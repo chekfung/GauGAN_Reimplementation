@@ -1,4 +1,9 @@
 # Our Specific files to ignore
+
+# Script to run on Brown CS grid
+grid_script
+
+# Data set information
 data/ADE20K_2016_07_26/
 data/csvIndexes/
 data/.*
