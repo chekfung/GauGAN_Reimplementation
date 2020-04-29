@@ -35,7 +35,7 @@ class SPADEGenerator(tf.keras.Model):
         reshaped = tf.reshape(result_dense, [batch_size, self.image_width, self.image_height, self.num_channels])
         result = self.spade_layers[0](reshaped, images)
         for layer in self.spade_layers[1:]:
-            result = self.upsample(result)
+            result = tf.image.resize(result, [2*np.shape(result)[1], 2*np.shape(result)[2]])
             result = layer(result, images)
         result = tf.nn.leaky_relu(result)
         result = self.conv_layer(result)
