@@ -12,7 +12,6 @@ class Discriminator(Model):
         super(Discriminator, self).__init__()
         # Padding, Stride, etc calculations
         KERNEL_SIZE = 4
-        pad_size = int(np.ceil((KERNEL_SIZE - 1) / 2))
         ALPHA_VAL = 0.2
 
         self.beta1 = beta1
