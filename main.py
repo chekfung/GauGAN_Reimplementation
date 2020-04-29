@@ -43,7 +43,7 @@ parser.add_argument('--z-dim', type=int, default=1024,
 parser.add_argument('--batch-size', type=int, default=32,
 					help='Sizes of image batches fed through the network')
 
-parser.add_argument('--num-data-threads', type=int, default=1,
+parser.add_argument('--num-data-threads', type=int, default=10,
 					help='Number of threads to use when loading & pre-processing training images')
 
 parser.add_argument('--num-epochs', type=int, default=200,
@@ -128,8 +128,8 @@ def train(generator, discriminator, dataset_iterator, manager):
 	total_disc_loss =0
 	iterations = 0
 
-	print("dataset_iterator is ", dataset_iterator)
-	print(dataset_iterator[0])
+	# print("dataset_iterator is ", dataset_iterator)
+	# print(dataset_iterator[0])
 
 	for iteration, batch in enumerate(dataset_iterator):
 
@@ -143,7 +143,8 @@ def train(generator, discriminator, dataset_iterator, manager):
 			
 			# Get discriminator output for fake images and real images
 			disc_real = discriminator.call(images, seg_maps)
-			disc_fake = discriminator.call(gen_output, seg_maps)
+			# disc_fake = discriminator.call(gen_output, seg_maps)
+			disc_fake = disc_real
 			
 			# calculate gen. loss and disc. loss
 			g_loss = generator.loss(disc_fake)
@@ -233,10 +234,10 @@ def main():
     : expected min_ndim=2, found ndim=1. Full shape received: [2]
 
 	'''
-	generator.build(input_shape=(4,4))
-	generator.summary()
+	# generator.build(input_shape=(4,4))
+	# generator.summary()
 	print('========================== DISCRIMINATOR ==========================')
-	discriminator.summary()
+	# discriminator.summary()
 
 	# For saving/loading models
 	checkpoint_dir = './checkpoints'

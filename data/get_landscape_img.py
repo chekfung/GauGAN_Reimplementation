@@ -11,7 +11,7 @@ from skimage import img_as_ubyte
 from skimage.transform import resize
 import scipy.io as sio
 import pandas as pd
-import convertMATIndexToCSV as matindex
+import convertMATIndexToCSV as MATLABconversion
 
 # Schema to separate the files from each other.
 
@@ -76,11 +76,13 @@ def get_images_by_object():
 
     for name in object_names:
         
-        object_cols_that_match = matindex.object_image_matrix.ix[:,[x for x in object_image_matrix.index if name in x]]
+        object_image_matrix = MATLABconversion.ADEIndex().object_image_matrix
+
+        object_cols_that_match = object_image_matrix.ix[:,[x for x in object_image_matrix.index if name in x]]
 
         # if column of this object has a nonzero value, corresponding image should be added
         whether_image_has_object = not (object_cols_that_match == 0)
-        containing_images = obj_col[whether_image_has_object].index.flatten()
+        containing_images = object_image_matrix[[x for x in object_image_matrix.index if (not object_image_matrix == 0)]].index.flatten()
         for index, row in containing_images.iterrows():
             real_filepaths.add(containing_images['folder'] + '/' + containing_images['filename'])
             
@@ -174,7 +176,7 @@ def main():
     # filepaths is a set
     filepaths = find_explicit_files(data_set_path, train=True)
 
-    # filepaths.update(get_images_by_object())
+    filepaths.update(get_images_by_object())
     
     for filepath in filepaths:
         imgs, segs = get_files(filepath)
@@ -204,7 +206,7 @@ def main():
     filepaths = find_explicit_files(os.path.join('ADE20K_2016_07_26', 'images'), train=False)
 
     # Add images by object content
-    # filepaths.update(get_images_by_object())
+    filepaths.update(get_images_by_object())
 
     # For the testing/validation set
     for filepath in filepaths:
