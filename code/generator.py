@@ -30,6 +30,7 @@ class SPADEGenerator(tf.keras.Model):
         self.conv_layer = tf.keras.layers.Conv2D(3, (3,3), activation='tanh')
         self.upsample = UpSampling2D()
         self.lrelu = LeakyReLU(alpha=0.2)
+        self.bce = tf.keras.losses.BinaryCrossentropy()
     
     def call(self, images, noise):
         result_dense = self.dense(noise)
@@ -44,7 +45,8 @@ class SPADEGenerator(tf.keras.Model):
     
     def loss(self,fake_logits):
         # Only hinge loss for now--can add extra losses later
-        return tf.keras.losses.hinge(tf.zeros_like(fake_logits), fake_logits)
+        #return tf.keras.losses.hinge(tf.zeros_like(fake_logits), fake_logits)
+        return self.bce(tf.ones_like(fake_logits), fake_logits)
     
 """     @tf.function
     def upsample(self, batch_inputs):

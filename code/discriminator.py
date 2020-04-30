@@ -62,4 +62,4 @@ class Discriminator(Model):
         return tf.reduce_mean(tf.math.add(real_loss, fake_loss)) """
         loss1 = self.bce(tf.ones_like(real_output), real_output)
         loss2 = self.bce(tf.zeros_like(fake_output), fake_output)
-        return loss1 + loss2
+        return tf.math.add(loss1, loss2)
