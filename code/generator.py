@@ -85,10 +85,10 @@ class SPADEGenerator(tf.keras.Model):
 
         return result
     
-
+    @tf.function
     def compute_latent_vector_size(self):
-        sw = self.img_w // (2**self.upsample_count)
-        sh = round(sw / (4/3))
+        sw = tf.math.floordiv(self.img_w, tf.math.pow(2, self.upsample_count))
+        sh = tf.math.floor(tf.math.divide(sw, tf.math.divide(4,3)))
         return sw, sh
 
     

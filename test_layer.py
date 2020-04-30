@@ -7,10 +7,17 @@ class MyDenseLayer(Layer):
 		super(MyDenseLayer, self).__init__()
 		self.num_outputs = num_outputs
 		self.fc = tf.keras.layers.Dense(num_outputs)
+		self.fc1 = tf.keras.layers.Dense(num_outputs)
 		self.optimizer = self.optimizer = tf.keras.optimizers.Adam(learning_rate = 0.0001, beta_1 = 0.5, beta_2 = 0.999)
 	
 	def call(self, input):
-		return self.fc(input)
+		x = self.fc(input)
+		self.dick_and_balls(x)
+		x = self.fc1(x)
+		return x
+	
+	def dick_and_balls(self, input):
+		return input // 2
 	
 	# def build(self, input_shape):
 	# 	self.fc.build(input_shape)
