@@ -23,8 +23,8 @@ class SpadeBlock(Layer):
 		self.conv2 = Conv2D(k, kernel_size=3, padding="SAME", use_bias=use_bias, dtype=tf.float32)
 		self.relu = ReLU() """
 
-		self.learned_shortcut = tf.math.not_equal(fin, fout)
-		fmiddle = tf.math.minimum(fin, fout)
+		self.learned_shortcut = (fin != fout)
+		fmiddle = min(fin, fout)
 		
 		self.conv0 = Conv2D(filters=fmiddle, kernel_size=3, strides=1, padding="SAME", use_bias=use_bias, dtype=tf.float32)
 		self.conv1 = Conv2D(filters=fout, kernel_size=3, strides=1, padding="SAME", use_bias=use_bias, dtype=tf.float32)

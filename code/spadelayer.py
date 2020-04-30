@@ -11,6 +11,7 @@ class SpadeLayer(Layer):
 		self.conv2 = Conv2D(filters=out_channels, kernel_size=5, strides=1, padding="SAME", use_bias=use_bias, dtype=tf.float32) 
 		self.conv3 = Conv2D(filters=out_channels, kernel_size=5, strides=1, padding="SAME", use_bias=use_bias, dtype=tf.float32)
 
+
 	""" def build(self, input_shape): 
 		super(SpadeLayer, self).build(input_shape) """
 
@@ -28,4 +29,3 @@ class SpadeLayer(Layer):
 		x = tf.multiply(x, norm)
 		x = tf.math.add(x, result_b)
 		return x
-		#return self.conv3(features)

@@ -5,7 +5,7 @@ from tensorflow.keras.layers import UpSampling2D, LeakyReLU, Conv2D
 
 class SPADEGenerator(tf.keras.Model):
     def __init__(self, beta1=0.5, beta2=0.999, learning_rate=0.0001, batch_size=16, z_dim=64, \
-        img_w=40, img_h=30):
+        img_w=128, img_h=96):
         super(SPADEGenerator, self).__init__()
         
         self.beta1 = beta1
@@ -54,30 +54,23 @@ class SPADEGenerator(tf.keras.Model):
         # Start doing spade layers
         result = self.spade_layers0(result, segs)
         result = self.upsample(result)
-        print("layer0: ", result.shape)
+        
         # Middle layers
         result = self.spade_layers1(result, segs)
-        print("layer1: ", result.shape)
         result = self.spade_layers2(result, segs)
-        print("layer2:", result.shape)
 
         # Rest of the layers
         result = self.upsample(result)
-        print("Unsampled layer2:", result.shape)
         result = self.spade_layers3(result, segs)
-        print("layer3: ", result.shape)
         
         result = self.upsample(result)
         result = self.spade_layers4(result, segs)
-        print("layer4:", result.shape)
 
         result = self.upsample(result)
         result = self.spade_layers5(result, segs)
-        print("layer5: ", result.shape)
 
         result = self.upsample(result)
         result = self.spade_layers6(result, segs)
-        print("Layer6: ", result.shape)
 
         # Take activation function plus final convolution layer in generator
         result = self.lrelu(result)
@@ -87,8 +80,14 @@ class SPADEGenerator(tf.keras.Model):
     
     @tf.function
     def compute_latent_vector_size(self):
-        sw = tf.math.floordiv(self.img_w, tf.math.pow(2, self.upsample_count))
-        sh = tf.math.floor(tf.math.divide(sw, tf.math.divide(4,3)))
+        # sw = tf.math.floordiv(self.img_w, tf.math.pow(2, self.upsample_count))
+        # sh = tf.math.divide(tf.cast(sw,dtype=tf.float32) , tf.math.divide(4,3))
+        # sh = tf.math.floor(sh)
+
+        # Non Tensorflow version that does not produce tensors
+        sw = self.img_w // (2 ** self.upsample_count)
+        sh = round(sw / (4 / 3))
+
         return sw, sh
 
     
