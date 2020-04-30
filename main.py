@@ -150,7 +150,6 @@ def train(generator, discriminator, dataset_iterator, manager):
 			
 			# calculate gen. loss and disc. loss
 			g_loss = generator.loss(disc_fake)
-			g_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(tf.ones([3,1]), tf.zeros([3,1])))
 			d_loss = discriminator.loss(disc_real, disc_fake)
 			
 			# Update loss counters
