@@ -47,7 +47,9 @@ class Discriminator(Model):
 
     @tf.function
     def call(self, inputs, segmaps):
-        x = tf.concat([segmaps, inputs], axis=-1)
+        _, x_h, x_w, _ = list(segmaps.shape)
+        inputs_resized = tf.image.resize(inputs, size=(x_h, x_w), method="nearest")
+        x = tf.concat([segmaps, inputs_resized], axis=-1)
         return self.model(x)
 
     """

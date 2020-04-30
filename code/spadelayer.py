@@ -6,13 +6,13 @@ class SpadeLayer(Layer):
 	def __init__(self, out_channels, use_bias=True, hidden_channels=128):
 		super(SpadeLayer, self).__init__()
 		self.bn = BatchNormalization()
-		self.conv1 = Conv2D(filters=hidden_channels, kernel_size=5, strides=1, padding="SAME", use_bias=use_bias)
+		self.conv1 = Conv2D(filters=hidden_channels, kernel_size=5, strides=1, padding="SAME", use_bias=use_bias, dtype=tf.float32)
 		self.relu = ReLU()
-		self.conv2 = Conv2D(filters=out_channels, kernel_size=5, strides=1, padding="SAME", use_bias=use_bias) 
-		self.conv3 = Conv2D(filters=out_channels, kernel_size=5, strides=1, padding="SAME", use_bias=use_bias)
+		self.conv2 = Conv2D(filters=out_channels, kernel_size=5, strides=1, padding="SAME", use_bias=use_bias, dtype=tf.float32) 
+		self.conv3 = Conv2D(filters=out_channels, kernel_size=5, strides=1, padding="SAME", use_bias=use_bias, dtype=tf.float32)
 
-	def build(self, input_shape): 
-		super(SpadeLayer, self).build(input_shape)
+	""" def build(self, input_shape): 
+		super(SpadeLayer, self).build(input_shape) """
 
 	def call(self, features, segmap):
 		norm = self.bn(features)
@@ -24,5 +24,8 @@ class SpadeLayer(Layer):
 		result_a = self.conv2(seg_result)
 		result_b = self.conv3(seg_result)
 
-		return tf.math.add(tf.math.multiply(norm, tf.math.add(1, result_a)), result_b) 
+		x = tf.math.add(1.0, result_a)
+		x = tf.multiply(x, norm)
+		x = tf.math.add(x, result_b)
+		return x
 		#return self.conv3(features)

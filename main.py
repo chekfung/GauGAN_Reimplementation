@@ -136,11 +136,9 @@ def train(generator, discriminator, dataset_iterator, manager):
 		# Break batch up into images and segmaps 
 		images, seg_maps = batch
 
-		with tf.GradientTape(persistent=True) as generator_tape, tf.GradientTape(persistent=True) as discriminator_tape:
-			noise = tf.random.uniform((args.batch_size, args.z_dim), minval=-1, maxval=1)
-			
+		with tf.GradientTape() as generator_tape, tf.GradientTape() as discriminator_tape:
 			# calculate generator output
-			gen_output = generator.call(seg_maps, noise)
+			gen_output = generator.call(seg_maps)
 			
 			# Get discriminator output for fake images and real images
 			print("GEN OUTPUT SHAPE IN TRAIN: ", gen_output.shape)
@@ -155,9 +153,6 @@ def train(generator, discriminator, dataset_iterator, manager):
 			# Update loss counters
 			total_gen_loss += g_loss
 			total_disc_loss += d_loss
-
-			""" print("Done!")
-			print(generator.trainable_variables, "\n\n\n\n") """
 
 		# get gradients
 		g_grad = generator_tape.gradient(g_loss, generator.trainable_variables)
