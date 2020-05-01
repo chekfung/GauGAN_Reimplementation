@@ -91,7 +91,7 @@ def get_images_by_object():
 
     for name in object_names:
 
-        print("Getting files that contain: " + name)
+        #print("Getting files that contain: " + name)
         
         # adeindex = MATLABconversion.ADEIndex()
 
@@ -113,7 +113,7 @@ def get_images_by_object():
                 # print(filepath)
                 real_filepaths.add(filepath)
 
-    print(real_filepaths)
+    #print(real_filepaths)
     return real_filepaths, object_names
 
 
@@ -153,7 +153,7 @@ def load_img(img_filepath, h, w):
     Loads img and then resizes to the specified h,w before returning from the 
     function
     '''
-    print("Loading from ", img_filepath)
+    #print("Loading from ", img_filepath)
     img = imread(img_filepath)
     return resize(img ,(h,w), anti_aliasing=True)
 
@@ -193,7 +193,7 @@ def split_files_by_object(files_by_object):
     seg_test = []
 
     for filepath in files_by_object:
-        print(filepath)
+        #print(filepath)
         segpath = filepath[:-4] + '_seg.png'
 
         if 'validation' in filepath:
@@ -215,17 +215,17 @@ def save_shrunken_image(img, train_dir, test_dir, whether_training):
     if whether_training:
         f = os.path.join(train_dir, filename)
         imsave(f, img_as_ubyte(resized))
-        print("Saving training image " + f)
+        #print("Saving training image " + f)
     else:
         f = os.path.join(test_dir, filename)
         imsave(f, img_as_ubyte(resized))
-        print("Saving testing image " + f)
+        #print("Saving testing image " + f)
 
 def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_training):
     # TODO: Depending on how testing works, implement the seg map values from 0 to n where 0 represents bad values that we do not want.
     filename = os.path.basename(img)
-    print(filename)
-
+    #print(filename)
+    num_approved_words = len(approved_words)
     # load each segmap in full size to knock out irrelevant objects
 
     initial_segmap = imread(img)
@@ -248,13 +248,13 @@ def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_train
     for code in unique_obj_codes:
         # the MATLAB indexing fix described above /should/ prevent this from being a key error
         img_object_name = adeindex.object_name_list['objectnames'].loc[code - 1]
-        for word in approved_words:
+        for word_index, word in enumerate(approved_words):
             # This "in" is checking list containment (word.split()) is list of strings
             if word in img_object_name:
                 break
             # In case that we went through all aproved words WITHOUT a match:
             parts_of_object_map_with_this_object = object_map == code
-            object_map[parts_of_object_map_with_this_object] = 1
+            object_map[parts_of_object_map_with_this_object] = 1 #(word_index + 1)/num_approved_words
         '''
          This^^ implementation leaves object codes in their original integer encodings 
          --> DOES NOT re-enumerate from 0 to n objects, because counting how many objects 

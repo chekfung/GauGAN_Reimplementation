@@ -174,6 +174,8 @@ def train(generator, discriminator, dataset_iterator, manager):
 
 			# calculate generator output
 			gen_output = generator.call(noise, seg_maps)
+			print("GENERATED ARRAY MIN: ", np.min(gen_output))
+			print("GENERATED ARRAY MAX: ", np.max(gen_output))
 			
 			# Get discriminator output for fake images and real images
 			disc_real = discriminator.call(images, seg_maps)
@@ -189,7 +191,7 @@ def train(generator, discriminator, dataset_iterator, manager):
 			
 			# FIXME: For testing purposes to see what generated output looks like
 			global EPOCH_COUNT
-			if iteration == 1: 
+			if iteration == 0: 
 				s = "logs/generated_samples"+'/'+str(EPOCH_COUNT)+'.png'
 				img_i = gen_output[0] * 255
 				imwrite(s, img_i)
