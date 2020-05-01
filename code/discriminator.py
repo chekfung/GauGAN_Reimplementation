@@ -2,7 +2,6 @@ import tensorflow as tf
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense, Flatten, Conv2D, BatchNormalization, LeakyReLU, Reshape, Conv2DTranspose 
 from tensorflow_addons.layers import InstanceNormalization
-import numpy as np
 
 
 # forward is call
@@ -13,7 +12,6 @@ class Discriminator(Model):
         super(Discriminator, self).__init__()
         # Padding, Stride, etc calculations
         KERNEL_SIZE = 4
-        pad_size = int(np.ceil((KERNEL_SIZE - 1) / 2))
         ALPHA_VAL = 0.2
 
         self.beta1 = beta1
@@ -44,10 +42,14 @@ class Discriminator(Model):
         # Final Convolutional Layer, as like PatchGAN implementation
         self.model.add(Conv2D(filters=1, kernel_size=KERNEL_SIZE, strides=1, padding="SAME"))
 
+        self.bce = tf.keras.losses.BinaryCrossentropy()
+
 
     @tf.function
     def call(self, inputs, segmaps):
-        x = tf.concat([segmaps, inputs], axis=-1)
+        _, x_h, x_w, _ = list(segmaps.shape)
+        inputs_resized = tf.image.resize(inputs, size=(x_h, x_w), method="nearest")
+        x = tf.concat([segmaps, inputs_resized], axis=-1)
         return self.model(x)
 
     """
@@ -56,7 +58,10 @@ class Discriminator(Model):
     opted to skip this and return if we have time
     """
     def loss(self, real_output, fake_output):
-        real_loss = -tf.reduce_mean(tf.minimum(real_output - 1, 0))
-        fake_loss = -tf.reduce_mean(tf.minimum(-fake_output - 1, 0))
+        """ real_loss = tf.math.multiply(-1, tf.reduce_mean(tf.minimum(tf.math.subtract(real_output, 1), 0)))
+        fake_loss = tf.math.multiply(-1, tf.reduce_mean(tf.minimum(tf.math.multiply(-1, tf.math.subtract(fake_output, 1)), 0)))
 
-        return tf.reduce_mean(real_loss + fake_loss)
+        return tf.reduce_mean(tf.math.add(real_loss, fake_loss)) """
+        loss1 = self.bce(tf.ones_like(real_output), real_output)
+        loss2 = self.bce(tf.zeros_like(fake_output), fake_output)
+        return tf.math.add(loss1, loss2)

@@ -14,8 +14,8 @@ import pandas as pd
 import convertMATIndexToCSV as MATLABconversion
 
 # Resize parameters
-HEIGHT = 30
-WIDTH = 40
+HEIGHT = 96
+WIDTH = 128
 
 # Schema to separate the files from each other.
 
@@ -38,7 +38,7 @@ def find_explicit_files(data_set_path, train=True):
 
     file_categories = []
     # filename = 'explicit_cv_landscapes_final_project.txt'
-    filename = 'test_explicit.txt'
+    filename = 'explicit_cv_landscapes_final_project.txt'
 
     # Get all the file categories that we want (Should be 47)
     with open(os.path.join(sys.path[0], filename)) as f:
@@ -251,27 +251,27 @@ def main():
 
     print("Done loading resized Testing data selected explicitly by scene")
 
-    # Add images by object content
-    # List of .jpg images that contain content we want
-    files_by_object = get_images_by_object()
+    # # Add images by object content
+    # # List of .jpg images that contain content we want
+    # files_by_object = get_images_by_object()
 
-    training_images, training_segs, testing_images, testing_segs = split_files_by_object(files_by_object)
+    # training_images, training_segs, testing_images, testing_segs = split_files_by_object(files_by_object)
 
-    for img in training_images:
-        save_shrunken_image(img, file_dir, train_dir, test_dir, whether_training=True)
+    # for img in training_images:
+    #     save_shrunken_image(img, file_dir, train_dir, test_dir, whether_training=True)
     
-    for seg in training_segs:
-        save_shrunken_image(seg, file_dir, train_dir, test_dir, whether_training=True)
+    # for seg in training_segs:
+    #     save_shrunken_image(seg, file_dir, train_dir, test_dir, whether_training=True)
 
-    print("Done loading resized Training data selected by object content")
+    # print("Done loading resized Training data selected by object content")
 
-    for img in testing_images:
-        save_shrunken_image(img, file_dir, train_dir, test_dir, whether_training=False) 
+    # for img in testing_images:
+    #     save_shrunken_image(img, file_dir, train_dir, test_dir, whether_training=False) 
 
-    for seg in testing_segs:
-        save_shrunken_image(seg, file_dir, train_dir, test_dir, whether_training=False)
+    # for seg in testing_segs:
+    #     save_shrunken_image(seg, file_dir, train_dir, test_dir, whether_training=False)
     
-    print("Done loading resized Testing data selected by object content")
+    # print("Done loading resized Testing data selected by object content")
 
 if __name__ == "__main__":
     main()
