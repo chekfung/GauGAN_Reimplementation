@@ -58,16 +58,19 @@ class Discriminator(Model):
     opted to skip this and return if we have time
     """
     def loss(self, real_output, fake_output):
+        # Hinge loss from pytorch implementation
         """ real_loss = tf.math.multiply(-1, tf.reduce_mean(tf.minimum(tf.math.subtract(real_output, 1), 0)))
         fake_loss = tf.math.multiply(-1, tf.reduce_mean(tf.minimum(tf.math.multiply(-1, tf.math.subtract(fake_output, 1)), 0)))
 
         return tf.reduce_mean(tf.math.add(real_loss, fake_loss))  """
-        loss1 = self.bce(tf.ones_like(real_output), real_output)
+        
+        # BCE loss 
+        """ loss1 = self.bce(tf.ones_like(real_output), real_output)
         loss2 = self.bce(tf.zeros_like(fake_output), fake_output)
-        return tf.math.add(loss1, loss2) 
-    """ def loss(self, real, fake): 
-        loss_1 = -tf.reduce_mean(tf.minimum(real - 1, 0))
-        loss_2 = -tf.reduce_mean(tf.minimum(-fake - 1, 0))
-        return loss_1 + loss_2 """
+        return tf.math.add(loss1, loss2)  """
+
+        # Least Squares loss
+        return 0.5 * (tf.reduce_mean((real_output - 1)**2) + \
+            tf.reduce_mean(fake_output**2))
         
 

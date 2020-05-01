@@ -3,10 +3,11 @@ import tensorflow as tf
 from code.spadeblock import SpadeBlock
 from tensorflow.keras.layers import UpSampling2D, LeakyReLU, Conv2D, Dense
 from code.spectral import spectral_norm
+from code.vgg import VGG_Loss
 
 class SPADEGenerator(tf.keras.Model):
     def __init__(self, beta1=0.5, beta2=0.999, learning_rate=0.0001, batch_size=16, z_dim=64, \
-        img_w=128, img_h=96):
+        img_w=128, img_h=96, lambda_vgg=10):
         super(SPADEGenerator, self).__init__()
         
         self.beta1 = beta1
@@ -18,6 +19,7 @@ class SPADEGenerator(tf.keras.Model):
         self.upsample_count = 5
         self.img_w = img_w
         self.img_h = img_h
+        self.lambda_vgg = lambda_vgg
 
         self.sw, self.sh = self.compute_latent_vector_size()
         #self.fc = Conv2D(16 * z_dim, kernel_size=3, strides=1, padding="SAME", use_bias=True, dtype=tf.float32)
@@ -47,6 +49,7 @@ class SPADEGenerator(tf.keras.Model):
 
         self.lrelu = LeakyReLU(alpha=0.2)
         self.bce = tf.keras.losses.BinaryCrossentropy()
+        self.vgg_loss_obj = VGG_Loss()
     
     def call(self, noise, segs):
         #result_dense = self.dense(noise)
@@ -96,9 +99,12 @@ class SPADEGenerator(tf.keras.Model):
         return sw, sh
 
     
-    def loss(self,fake_logits):
+    def loss(self, fake_logits, fake_image, real_image):
         # Only hinge loss for now--can add extra losses later
         #return tf.keras.losses.hinge(tf.zeros_like(fake_logits), fake_logits)
         #return self.bce(tf.ones_like(fake_logits), fake_logits)
         #return tf.keras.losses.hinge(tf.ones_like(fake_logits), fake_logits)
-        return -tf.reduce_mean(fake_logits)
+        #return -tf.reduce_mean(fake_logits)
+        adversarial_loss = 0.5 * tf.reduce_mean((fake_logits - 1)**2) # Using Least squares loss
+        vgg_loss = self.vgg_loss_obj(fake_image, real_image) * self.lambda_vgg
+        return adversarial_loss + vgg_loss

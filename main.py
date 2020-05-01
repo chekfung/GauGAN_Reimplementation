@@ -77,6 +77,9 @@ parser.add_argument('--img-h', type=int, default=96,
 parser.add_argument('--img-w', type=int, default=128,
 					help='width of image')
 
+parser.add_argument('--lambda-vgg', type=float, default=10,
+					help='weight of vgg loss in generator')
+
 parser.add_argument('--log-every', type=int, default=7,
 					help='Print losses after every [this many] training iterations')
 
@@ -177,7 +180,7 @@ def train(generator, discriminator, dataset_iterator, manager):
 			disc_fake = discriminator.call(gen_output, seg_maps)
 			
 			# calculate gen. loss and disc. loss
-			g_loss = generator.loss(disc_fake)
+			g_loss = generator.loss(disc_fake, gen_output, images)
 			d_loss = discriminator.loss(disc_real, disc_fake)
 			
 			# Update loss counters
@@ -271,7 +274,8 @@ def main():
 		n_threads=args.num_data_threads, drop_remainder=False)
 
 	# Initialize generator and discriminator models
-	generator = SPADEGenerator(args.beta1, args.beta2, args.gen_learn_rate, args.batch_size, args.z_dim, args.img_w, args.img_h)
+	generator = SPADEGenerator(args.beta1, args.beta2, args.gen_learn_rate, \
+		args.batch_size, args.z_dim, args.img_w, args.img_h, args.lambda_vgg)
 	discriminator = Discriminator(args.beta1, args.beta2, args.dsc_learn_rate)
 
 	print('========================== GENERATOR ==========================')

@@ -85,7 +85,7 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
         """
         Given a filepath for a segmap, this function gets the corresponding segmap and returns the (image, segmap) tuple after decoding both.
 
-        :param file_path: a batch of images
+        :param segmap_path: a filepath to one segmap 
 
         :return: (image, segmap) tuple, both decoded
         """
@@ -101,7 +101,10 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
         # image_path = 'a'
 
         # Load in image pair to return
-        segmap = load_and_process_image(segmap_path)
+        #segmap = load_and_process_image(segmap_path)
+
+        with tf.compat.v1.Session() as sess:
+            segmap = tf.convert_to_tensor(np.load(sess.run(segmap_path)))
         image = load_and_process_image(image_path)
 
         # augmented_pair = augment(image, segmap)
@@ -111,7 +114,9 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
 
     
     # RegEx to match all segmap paths
-    seg_path = dir_name + '/*_seg.png'
+    #seg_path = dir_name + '/*_seg.png'
+
+    seg_path = dir_name + '/*.npy'
     dataset = tf.data.Dataset.list_files(seg_path)
 
     # Shuffle order

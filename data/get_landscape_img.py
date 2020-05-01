@@ -224,6 +224,7 @@ def save_shrunken_image(img, train_dir, test_dir, whether_training):
 def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_training):
     # TODO: Depending on how testing works, implement the seg map values from 0 to n where 0 represents bad values that we do not want.
     filename = os.path.basename(img)
+    print(filename)
 
     # load each segmap in full size to knock out irrelevant objects
 
@@ -243,14 +244,10 @@ def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_train
     # get unique image labels in the decoded segmap (list of contained objects)
     unique_obj_codes = np.unique(object_map)
 
-    print("unique codes is ", unique_obj_codes)
-
     # if object is not in our list of approved objects, then set all pixels of this object to 0
     for code in unique_obj_codes:
         # the MATLAB indexing fix described above /should/ prevent this from being a key error
-        print("curr code is ", code)
         img_object_name = adeindex.object_name_list['objectnames'].loc[code - 1]
-        print("curr img obj name is ", img_object_name)
         for word in approved_words:
             # This "in" is checking list containment (word.split()) is list of strings
             if word in img_object_name:
@@ -267,20 +264,21 @@ def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_train
     # Now, object_map has only nonzero pixel values for objects that we care about
 
     resized_segmap = tf.image.resize(object_map[:,:,np.newaxis], size=(HEIGHT, WIDTH), method='nearest')
-    npy_segmap = tf.make_ndarray(resized_segmap)
+    npy_segmap = np.array(resized_segmap)
     generic_filename, ext = os.path.splitext(filename)
+    
     if whether_training:
         f = os.path.join(train_dir, filename)
         npy_path = os.path.join(train_dir,generic_filename)
         imsave(f, resized_segmap)
         np.save(npy_path, npy_segmap)
-        print("Saving training segmap " + f)
+        #print("Saving training segmap " + f)
     else:
         f = os.path.join(test_dir, filename)
         npy_path = os.path.join(test_dir,generic_filename)
         imsave(f, resized_segmap)
         np.save(npy_path, npy_segmap)
-        print("Saving testing segmap " + f)
+        #print("Saving testing segmap " + f)
 
 
 def main():        
