@@ -4,6 +4,8 @@ import tensorflow_addons as tfa
 import os
 import sys
 
+import matplotlib.pyplot as plt
+
 """
 MODELED AFTER Brown CSCI 1470 DEEP LEARNING GAN ASSIGNMENT 7 HOMEWORK
 """
@@ -37,10 +39,12 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
         """
         # Load image
         image = tf.io.decode_png(tf.io.read_file(file_path), channels=3)
+
         # Convert image to normalized float (0, 1)
         image = tf.image.convert_image_dtype(image, tf.float32)
+
         # Rescale data to range (-1, 1)
-        image = (image - 0.5) * 2
+        #image = (image - 0.5) * 2
         return image
     
     def augment(image, segmap):
@@ -78,11 +82,6 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
         return (aug_image, aug_segmap)
 
     def get_image_segmap_pair(segmap_path):
-        print(type(segmap_path))
-        print(segmap_path)
-        print(tf.shape(segmap_path))
-        print("AHHHHHHH", segmap_path)
-
         """
         Given a filepath for a segmap, this function gets the corresponding segmap and returns the (image, segmap) tuple after decoding both.
 
@@ -100,7 +99,6 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
 
         # image_path = segmap_path[:-8] + '.png'
         # image_path = 'a'
-        print("WOOOHOOOOOOOO")
 
         # Load in image pair to return
         segmap = load_and_process_image(segmap_path)
@@ -114,9 +112,7 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
     
     # RegEx to match all segmap paths
     seg_path = dir_name + '/*_seg.png'
-    print("segpath is ", seg_path)
     dataset = tf.data.Dataset.list_files(seg_path)
-    print(dataset)
 
     # Shuffle order
     dataset = dataset.shuffle(buffer_size=shuffle_buffer_size)

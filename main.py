@@ -6,7 +6,7 @@ import tensorflow_hub as hub
 from keras.applications.inception_v3 import InceptionV3 
 from keras.applications.inception_v3 import preprocess_input
 
-from matplotlib.pyplot import imshow, show
+import matplotlib.pyplot as plt
 
 import numpy as np
 import scipy
@@ -27,6 +27,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 gpu_available = tf.test.is_gpu_available()
 print("GPU Available: ", gpu_available)
+EPOCH_COUNT = 0
 
 ## --------------------------------------------------------------------------------------
 parser = argparse.ArgumentParser(description='GAUGAN')
@@ -52,10 +53,10 @@ parser.add_argument('--z-dim', type=int, default=64,
 parser.add_argument('--batch-size', type=int, default=16,
 					help='Sizes of image batches fed through the network')
 
-parser.add_argument('--num-data-threads', type=int, default=10,
+parser.add_argument('--num-data-threads', type=int, default=5,
 					help='Number of threads to use when loading & pre-processing training images')
 
-parser.add_argument('--num-epochs', type=int, default=20,
+parser.add_argument('--num-epochs', type=int, default=100,
 					help='Number of passes through the training data to make before stopping')
 
 parser.add_argument('--gen-learn-rate', type=float, default=0.0001,
@@ -79,7 +80,7 @@ parser.add_argument('--img-w', type=int, default=128,
 parser.add_argument('--log-every', type=int, default=7,
 					help='Print losses after every [this many] training iterations')
 
-parser.add_argument('--save-every', type=int, default=2,
+parser.add_argument('--save-every', type=int, default=5,
 					help='Save the state of the network after every [this many] epochs iterations')
 
 parser.add_argument('--device', type=str, default='GPU:0' if gpu_available else 'CPU:0',
@@ -162,13 +163,14 @@ def train(generator, discriminator, dataset_iterator, manager):
 	# print(dataset_iterator[0])
 
 	for iteration, batch in enumerate(dataset_iterator):
-
 		# Break batch up into images and segmaps 
 		images, seg_maps = batch
 
 		with tf.GradientTape() as generator_tape, tf.GradientTape() as discriminator_tape:
+			noise = tf.random.uniform((args.batch_size, 256), minval=-1, maxval=1)
+
 			# calculate generator output
-			gen_output = generator.call(seg_maps)
+			gen_output = generator.call(noise, seg_maps)
 			
 			# Get discriminator output for fake images and real images
 			disc_real = discriminator.call(images, seg_maps)
@@ -181,6 +183,21 @@ def train(generator, discriminator, dataset_iterator, manager):
 			# Update loss counters
 			total_gen_loss += g_loss
 			total_disc_loss += d_loss
+			
+			# FIXME: For testing purposes to see what generated output looks like
+			global EPOCH_COUNT
+			if iteration == 1: 
+				s = "logs/generated_samples"+'/'+str(EPOCH_COUNT)+'.png'
+				img_i = gen_output[0] * 255
+				imwrite(s, img_i)
+
+				# plt.figure(1)
+				# for n in range(16):
+				# 	ax = plt.subplot(4, 4, n+1)
+				# 	plt.imshow(gen_output[n])
+				# 	plt.axis('off')
+				# plt.savefig(s)
+				
 
 		# get gradients
 		g_grad = generator_tape.gradient(g_loss, generator.trainable_variables)
@@ -196,7 +213,8 @@ def train(generator, discriminator, dataset_iterator, manager):
 			fid_ = fid_function(images, gen_output)
 			total_fid += fid_
 			iterations += 1
-			print('**** INCEPTION DISTANCE: %g ****' % fid_)
+
+	EPOCH_COUNT += 1
 	return total_fid / iterations, total_gen_loss / iterations, total_disc_loss / iterations
 
 
@@ -212,13 +230,14 @@ def test(generator, dataset_iterator):
 	total_gen_loss = 0
 	total_disc_loss = 0
 	iterations = 0
-
+	
 	for iteration, batch in enumerate(dataset_iterator):
+		noise = tf.random.uniform((args.batch_size, 256), minval=-1, maxval=1)
 		image, seg_map = batch
-		img = generator.call(seg_map).numpy()
+		img = generator.call(noise, seg_map).numpy()
 
 		# Rescale the image from (-1, 1) to (0, 255)
-		#img = (-((img / 2) - 0.5)) * 255
+		img = img * 255
 		
 		if iteration == 1: 
 			print(img)
@@ -231,9 +250,9 @@ def test(generator, dataset_iterator):
 		s = args.out_dir+'/'+str(iteration)+'_generated.png'
 		s2 = args.out_dir+'/'+str(iteration)+'_truth.png'
 		s3 = args.out_dir+'/'+str(iteration)+'_segmap.png'
-		imsave(s, img_i)
-		#imsave(s2, image[0])
-		#imsave(s3, seg_map[0])
+		imwrite(s, img_i)
+		imsave(s2, image[0])
+		imsave(s3, seg_map[0])
 
 		iterations += 1
 	
@@ -282,6 +301,7 @@ def main():
 
 	if args.restore_checkpoint or args.mode == 'test':
 		# restores the latest checkpoint using from the manager
+		print("MOO")
 		checkpoint.restore(manager.latest_checkpoint) 
 
 	try:
@@ -351,3 +371,5 @@ def main():
 	
 if __name__ == '__main__':
 	main()
+
+
