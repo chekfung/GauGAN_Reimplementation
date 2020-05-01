@@ -149,7 +149,7 @@ def train(generator, discriminator, dataset_iterator, manager):
 	Train the model for one epoch. Save a checkpoint every 500 or so batches.
 	:param generator: generator model
 	:param discriminator: discriminator model
-	:param dataset_ierator: iterator over dataset, see preprocess.py for more information
+	:param dataset_iterator: iterator over dataset, see preprocess.py for more information
 	:param manager: the manager that handles saving checkpoints by calling save()
 	:return: The average FID score over the epoch
 	"""
