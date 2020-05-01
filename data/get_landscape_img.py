@@ -267,14 +267,19 @@ def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_train
     # Now, object_map has only nonzero pixel values for objects that we care about
 
     resized_segmap = tf.image.resize(object_map[:,:,np.newaxis], size=(HEIGHT, WIDTH), method='nearest')
-
+    npy_segmap = tf.make_ndarray(resized_segmap)
+    generic_filename, ext = os.path.splitext(filename)
     if whether_training:
         f = os.path.join(train_dir, filename)
+        npy_path = os.path.join(train_dir,generic_filename)
         imsave(f, resized_segmap)
+        np.save(npy_path, npy_segmap)
         print("Saving training segmap " + f)
     else:
         f = os.path.join(test_dir, filename)
+        npy_path = os.path.join(test_dir,generic_filename)
         imsave(f, resized_segmap)
+        np.save(npy_path, npy_segmap)
         print("Saving testing segmap " + f)
 
 
