@@ -111,8 +111,11 @@ def get_images_by_object():
 
             for index, row in image_rows_to_add.iterrows():
                 # print('looking at index of matched images that is #:', index)
-                # filepath = image_stats_matrix.loc[index,'folder'] + '/' + image_stats_matrix.loc[index,'filename']
-                filepath = image_stats_matrix.loc[index,'folder'] + '/' + index
+                filepath = None
+                if adeindex.CSVsExist:
+                    filepath = image_stats_matrix.loc[index,'folder'] + '/' + image_stats_matrix.loc[index,'filename']
+                else:
+                    filepath = image_stats_matrix.loc[index,'folder'] + '/' + index
                 # print(filepath)
                 real_filepaths.add(filepath)
 
@@ -264,6 +267,7 @@ def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_train
                 break
         
         if approved_code:
+            print(img_object_name + " is approved")
             num_approved_words_in_img = num_approved_words_in_img + 1
             # do not change pixel values for approved objects
         else:
@@ -273,6 +277,11 @@ def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_train
     # Image does not contain sufficient number of different objects 
     # -> don't include it
     if num_approved_words_in_img < UNIQUE_APPROVED_OBJECTS_REQUIRED:
+        print("Tossing out " + filename + " because it doesn't have enough unique objects on our list")
+        if whether_training:
+            os.remove(os.path.join(train_dir, filename[:-8] + '.jpg'))
+        else:
+            os.remove(os.path.join(test_dir, filename[:-8] + '.jpg'))
         return
 
         '''

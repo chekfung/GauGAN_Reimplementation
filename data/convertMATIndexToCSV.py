@@ -159,7 +159,7 @@ def main():
     if os.path.exists(csv_folderpath):
       shutil.rmtree(csv_folderpath)
     os.mkdir(csv_folderpath)
-    print("Now printing CSV files")
+    print("Now saving CSV files")
     index.saveALLCSVs()
     print("Your CSV files are now toasty and warm")
 
