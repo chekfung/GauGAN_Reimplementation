@@ -101,12 +101,22 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
         # image_path = 'a'
 
         # Load in image pair to return
-        #segmap = load_and_process_image(segmap_path)
 
-        with tf.compat.v1.Session() as sess:
-            segmap = tf.convert_to_tensor(np.load(sess.run(segmap_path)))
-        image = load_and_process_image(image_path)
+        # # The approach below doesn't work anymore because when images are saved
+        # # as segmaps, their pixel value ranges get clipped
+        # segmap = load_and_process_image(segmap_path)
 
+        ## This approach fails because np.load() cannot be called on a Tensor string
+        # with tf.compat.v1.Session() as sess:
+        #     segmap = tf.convert_to_tensor(np.load(sess.run(segmap_path)))
+        # image = load_and_process_image(image_path)
+
+
+        # Since we're going to flatten all of the segmap vectors, the particular
+        # way that we flatten shouldn't matter as long as it's consistent
+        segmap_vector = tf.io.read_file(tf.)
+
+        ## For data augmentation:
         # augmented_pair = augment(image, segmap)
 
         # return augmented_pair
@@ -114,9 +124,19 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
 
     
     # RegEx to match all segmap paths
-    #seg_path = dir_name + '/*_seg.png'
+   
+    ## Approach 1: save segmaps as shrunken png files
+    ## Problem: 
+    # seg_path = dir_name + '/*_seg.png'
 
-    seg_path = dir_name + '/*.npy'
+    ## Approach 2: save segmaps as .npy files
+    ## Problem: can't call np.load() on a Tensor string
+    # seg_path = dir_name + '/*.npy'
+
+    # Current approach: save segmaps as csv format of numpy array
+    # Plan: load csv files with tf functions
+    seg_path = dir_name + '/*.csv'
+
     dataset = tf.data.Dataset.list_files(seg_path)
 
     # Shuffle order

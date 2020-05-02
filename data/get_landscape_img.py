@@ -261,7 +261,7 @@ def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_train
             our words match to, and then enumerating the matches, is a pain
         '''
 
-    # Now, object_map has only nonzero pixel values for objects that we care about
+    # Now, object_map has nonzero pixel values only for objects that we care about
 
     resized_segmap = tf.image.resize(object_map[:,:,np.newaxis], size=(HEIGHT, WIDTH), method='nearest')
     npy_segmap = np.array(resized_segmap)
@@ -271,15 +271,14 @@ def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_train
         f = os.path.join(train_dir, filename)
         npy_path = os.path.join(train_dir,generic_filename)
         imsave(f, resized_segmap)
-        np.save(npy_path, npy_segmap)
+        np.savetxt(npy_path + '.csv', npy_segmap, delimiter=",")
         #print("Saving training segmap " + f)
     else:
         f = os.path.join(test_dir, filename)
         npy_path = os.path.join(test_dir,generic_filename)
         imsave(f, resized_segmap)
-        np.save(npy_path, npy_segmap)
+        np.savetxt(npy_path + '.csv', npy_segmap, delimiter=",")
         #print("Saving testing segmap " + f)
-
 
 def main():        
     # Create the file directories to house the new resized imgs
