@@ -251,10 +251,10 @@ def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_train
         for word_index, word in enumerate(approved_words):
             # This "in" is checking list containment (word.split()) is list of strings
             if word in img_object_name:
+                parts_of_object_map_with_this_object = object_map == code
+                object_map[parts_of_object_map_with_this_object] = (word_index + 1)/num_approved_words
                 break
-            # In case that we went through all aproved words WITHOUT a match:
-            parts_of_object_map_with_this_object = object_map == code
-            object_map[parts_of_object_map_with_this_object] = 1 #(word_index + 1)/num_approved_words
+            
         '''
          This^^ implementation leaves object codes in their original integer encodings 
          --> DOES NOT re-enumerate from 0 to n objects, because counting how many objects 
