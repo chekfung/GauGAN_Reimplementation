@@ -59,10 +59,10 @@ parser.add_argument('--num-data-threads', type=int, default=8,
 parser.add_argument('--num-epochs', type=int, default=200,
 					help='Number of passes through the training data to make before stopping')
 
-parser.add_argument('--gen-learn-rate', type=float, default=0.0004,
+parser.add_argument('--gen-learn-rate', type=float, default=0.0002,
 					help='Learning rate for Generator Adam optimizer')
 
-parser.add_argument('--dsc-learn-rate', type=float, default=0.0002,
+parser.add_argument('--dsc-learn-rate', type=float, default=0.0003,
 					help='Learning rate for Discriminator Adam optimizer')
 
 parser.add_argument('--beta1', type=float, default=0,
@@ -77,7 +77,7 @@ parser.add_argument('--img-h', type=int, default=96,
 parser.add_argument('--img-w', type=int, default=128,
 					help='width of image')
 
-parser.add_argument('--lambda-vgg', type=float, default= 0.01,
+parser.add_argument('--lambda-vgg', type=float, default= 1,#0.01,
 					help='weight of vgg loss in generator')
 
 parser.add_argument('--log-every', type=int, default=7,
@@ -257,7 +257,6 @@ def test(generator, dataset_iterator):
 		s3 = args.out_dir+'/'+str(iteration)+'_segmap.png'
 		imwrite(s, img_i)
 		imsave(s2, image[0])
-		imsave(s3, seg_map[0])
 
 		iterations += 1
 	

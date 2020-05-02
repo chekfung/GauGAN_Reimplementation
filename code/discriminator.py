@@ -62,7 +62,8 @@ class Discriminator(Model):
         real_loss = tf.math.multiply(-1, tf.reduce_mean(tf.minimum(tf.math.subtract(real_output, 1), 0)))
         fake_loss = tf.math.multiply(-1, tf.reduce_mean(tf.minimum(tf.math.multiply(-1, tf.math.subtract(fake_output, 1)), 0)))
 
-        return tf.math.divide(tf.reduce_mean(tf.math.add(real_loss, fake_loss)), 2)
+        # NOTE: THIS INITIALLY HAD DIVISION BY 2. GOT RID OF IT SO THAT REACHES 0 LATER.
+        return tf.reduce_mean(tf.math.add(real_loss, fake_loss))
         
         # BCE loss 
         """ loss1 = self.bce(tf.ones_like(real_output), real_output)
