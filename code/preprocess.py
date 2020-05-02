@@ -26,6 +26,10 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
 
     :return: an iterator into the dataset
     """
+    objects_file = './data/objects_we_want.txt'
+    f = open(objects_file, 'r')
+    num_objects = len(f.read().split())
+
     # Function used to load and pre-process image files
     # (Have to define this ahead of time b/c Python does allow multi-line
     #    lambdas, *grumble*)
@@ -46,6 +50,29 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
         # Rescale data to range (-1, 1)
         #image = (image - 0.5) * 2
         return image
+    
+    def load_and_process_segmap(file_path):
+        """
+        Given a file path, this function opens and decodes the image stored in the file.
+
+        :param file_path: a batch of images
+
+        :return: a one-hot encoded segmap
+        """
+        # Load image
+        # Grayscale already, so transform to 2D grayscale array
+        image = tf.io.decode_png(tf.io.read_file(file_path), channels=1) 
+        image = tf.squeeze(image)
+        # Charlie does not think we should be normalizing the segmaps
+        # # Convert image to normalized float (0, 1)
+        # image = tf.image.convert_image_dtype(image, tf.float32) * num_objects
+        # image = tf.cast(image, tf.uint8)
+        one_hot = tf.one_hot(image, num_objects)
+        print("One hot is: ", one_hot)
+
+        # Rescale data to range (-1, 1)
+        #image = (image - 0.5) * 2
+        return one_hot
     
     def augment(image, segmap):
         """
@@ -106,15 +133,17 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
         # # as segmaps, their pixel value ranges get clipped
         # segmap = load_and_process_image(segmap_path)
 
+        
         ## This approach fails because np.load() cannot be called on a Tensor string
         # with tf.compat.v1.Session() as sess:
         #     segmap = tf.convert_to_tensor(np.load(sess.run(segmap_path)))
         # image = load_and_process_image(image_path)
 
 
-        # Since we're going to flatten all of the segmap vectors, the particular
-        # way that we flatten shouldn't matter as long as it's consistent
-        segmap_vector = tf.io.read_file(tf.)
+        segmap = load_and_process_segmap(segmap_path)
+
+        image = load_and_process_image(image_path)
+
 
         ## For data augmentation:
         # augmented_pair = augment(image, segmap)
@@ -133,9 +162,14 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
     ## Problem: can't call np.load() on a Tensor string
     # seg_path = dir_name + '/*.npy'
 
-    # Current approach: save segmaps as csv format of numpy array
-    # Plan: load csv files with tf functions
-    seg_path = dir_name + '/*.csv'
+    ## Approach 3: save segmaps as csv files and load with tf
+    ## Fails because tf loads csv files by separate Tensors by column (not a unified array)
+    # seg_path = dir_name + '/*.csv'
+
+
+    # Current approach: save segmaps as png images after reassigning all object
+    # encodings 
+    seg_path = dir_name + '/*.png'
 
     dataset = tf.data.Dataset.list_files(seg_path)
 

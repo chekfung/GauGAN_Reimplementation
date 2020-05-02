@@ -22,7 +22,9 @@ class SPADEGenerator(tf.keras.Model):
         self.lambda_vgg = lambda_vgg
 
         self.sw, self.sh = self.compute_latent_vector_size()
-        #self.fc = Conv2D(16 * z_dim, kernel_size=3, strides=1, padding="SAME", use_bias=True, dtype=tf.float32)
+        self.fc = Conv2D(16 * z_dim, kernel_size=3, strides=1, padding="SAME", use_bias=True, dtype=tf.float32)
+
+        # Not sure what this is for
         #self.dense = tf.keras.layers.Dense(self.sh*self.sw*self.num_channels, dtype=tf.float32)
         #self.dense = tf.keras.layers.Dense(16384)
 
@@ -52,13 +54,17 @@ class SPADEGenerator(tf.keras.Model):
         self.vgg_loss_obj = VGG_Loss()
     
     def call(self, noise, segs):
-        #result_dense = self.dense(noise)
         #reshaped = tf.reshape(result_dense, [-1, self.image_width, self.image_height, self.num_channels])
         #reshaped = tf.reshape(result_dense, [segs.shape[0], -1, 4, 4])
-        #result = tf.image.resize(segs, size=(self.sh, self.sw), method="nearest")
-        #result = self.fc(result)
-        result = self.dense(noise)
-        result = tf.reshape(result, [self.batch_size, self.sh, self.sw, 16 * self.z_dim])
+
+        # Conv2D based off seg map noise
+        result = tf.image.resize(segs, size=(self.sh, self.sw), method="nearest")
+        result = self.fc(result)
+
+        # Dense Random Noise
+        #result = self.dense(noise)
+        #result = tf.reshape(result, [self.batch_size, self.sh, self.sw, 16 * self.z_dim])
+
         # Start doing spade layers
         result = self.spade_layers0(result, segs)
         result = self.upsample(result)
@@ -101,10 +107,9 @@ class SPADEGenerator(tf.keras.Model):
     
     def loss(self, fake_logits, fake_image, real_image):
         # Only hinge loss for now--can add extra losses later
-        #return tf.keras.losses.hinge(tf.zeros_like(fake_logits), fake_logits)
+        hinge_loss = tf.reduce_mean(tf.keras.losses.hinge(tf.zeros_like(fake_logits), fake_logits))
         #return self.bce(tf.ones_like(fake_logits), fake_logits)
-        #return tf.keras.losses.hinge(tf.ones_like(fake_logits), fake_logits)
         #return -tf.reduce_mean(fake_logits)
-        adversarial_loss = 0.5 * tf.reduce_mean((fake_logits - 1)**2) # Using Least squares loss
-        vgg_loss = self.vgg_loss_obj(fake_image, real_image) * self.lambda_vgg
-        return adversarial_loss + vgg_loss
+        #adversarial_loss = tf.math.multiply(0.5,tf.reduce_mean((fake_logits - 1)**2)) # Using Least squares loss
+        vgg_loss = tf.math.multiply(self.vgg_loss_obj(fake_image, real_image), self.lambda_vgg)
+        return tf.math.divide(tf.math.add(hinge_loss, vgg_loss), 2)

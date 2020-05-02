@@ -59,10 +59,11 @@ class Discriminator(Model):
     """
     def loss(self, real_output, fake_output):
         # Hinge loss from pytorch implementation
-        """ real_loss = tf.math.multiply(-1, tf.reduce_mean(tf.minimum(tf.math.subtract(real_output, 1), 0)))
+        real_loss = tf.math.multiply(-1, tf.reduce_mean(tf.minimum(tf.math.subtract(real_output, 1), 0)))
         fake_loss = tf.math.multiply(-1, tf.reduce_mean(tf.minimum(tf.math.multiply(-1, tf.math.subtract(fake_output, 1)), 0)))
 
-        return tf.reduce_mean(tf.math.add(real_loss, fake_loss))  """
+        # NOTE: THIS INITIALLY HAD DIVISION BY 2. GOT RID OF IT SO THAT REACHES 0 LATER.
+        return tf.reduce_mean(tf.math.add(real_loss, fake_loss))
         
         # BCE loss 
         """ loss1 = self.bce(tf.ones_like(real_output), real_output)
@@ -70,7 +71,7 @@ class Discriminator(Model):
         return tf.math.add(loss1, loss2)  """
 
         # Least Squares loss
-        return 0.5 * (tf.reduce_mean((real_output - 1)**2) + \
-            tf.reduce_mean(fake_output**2))
+        # return tf.math.multiply(0.5,tf.math.add((tf.reduce_mean((real_output - 1)**2), \
+        #     tf.reduce_mean(fake_output**2))))
         
 

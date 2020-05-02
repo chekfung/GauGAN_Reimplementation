@@ -20,7 +20,7 @@ import argparse
 
 from code.discriminator import Discriminator 
 from code.generator import SPADEGenerator
-from preprocess import load_image_batch
+from code.preprocess import load_image_batch
 
 # Killing optional CPU driver warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -53,19 +53,19 @@ parser.add_argument('--z-dim', type=int, default=64,
 parser.add_argument('--batch-size', type=int, default=16,
 					help='Sizes of image batches fed through the network')
 
-parser.add_argument('--num-data-threads', type=int, default=5,
+parser.add_argument('--num-data-threads', type=int, default=8,
 					help='Number of threads to use when loading & pre-processing training images')
 
-parser.add_argument('--num-epochs', type=int, default=100,
+parser.add_argument('--num-epochs', type=int, default=200,
 					help='Number of passes through the training data to make before stopping')
 
-parser.add_argument('--gen-learn-rate', type=float, default=0.0001,
+parser.add_argument('--gen-learn-rate', type=float, default=0.0002,
 					help='Learning rate for Generator Adam optimizer')
 
-parser.add_argument('--dsc-learn-rate', type=float, default=0.0004,
+parser.add_argument('--dsc-learn-rate', type=float, default=0.0003,
 					help='Learning rate for Discriminator Adam optimizer')
 
-parser.add_argument('--beta1', type=float, default=0.5,
+parser.add_argument('--beta1', type=float, default=0,
 					help='"beta1" parameter for Adam optimizer')
 
 parser.add_argument('--beta2', type=float, default=0.999,
@@ -77,7 +77,7 @@ parser.add_argument('--img-h', type=int, default=96,
 parser.add_argument('--img-w', type=int, default=128,
 					help='width of image')
 
-parser.add_argument('--lambda-vgg', type=float, default=10,
+parser.add_argument('--lambda-vgg', type=float, default= 1,#0.01,
 					help='weight of vgg loss in generator')
 
 parser.add_argument('--log-every', type=int, default=7,
@@ -174,6 +174,8 @@ def train(generator, discriminator, dataset_iterator, manager):
 
 			# calculate generator output
 			gen_output = generator.call(noise, seg_maps)
+			#print("GENERATED ARRAY MIN: ", np.min(gen_output))
+			#print("GENERATED ARRAY MAX: ", np.max(gen_output))
 			
 			# Get discriminator output for fake images and real images
 			disc_real = discriminator.call(images, seg_maps)
@@ -189,7 +191,7 @@ def train(generator, discriminator, dataset_iterator, manager):
 			
 			# FIXME: For testing purposes to see what generated output looks like
 			global EPOCH_COUNT
-			if iteration == 1: 
+			if iteration == 0: 
 				s = "logs/generated_samples"+'/'+str(EPOCH_COUNT)+'.png'
 				img_i = gen_output[0] * 255
 				imwrite(s, img_i)
@@ -255,7 +257,6 @@ def test(generator, dataset_iterator):
 		s3 = args.out_dir+'/'+str(iteration)+'_segmap.png'
 		imwrite(s, img_i)
 		imsave(s2, image[0])
-		imsave(s3, seg_map[0])
 
 		iterations += 1
 	

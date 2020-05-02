@@ -5,7 +5,7 @@ class VGG(tf.keras.Model):
 	
 	def __init__(self, trainable=False): 
 		super(VGG, self).__init__(name="Vgg19")
-		vgg_feats = tf.keras.applications.vgg19.VGG19(weights='imagenet', include_top=False)
+		vgg_feats = tf.keras.applications.vgg19.VGG19(weights='imagenet', include_top=False, input_shape=(128,96,3))
 
 		vgg_feats.trainable = trainable
 		
@@ -27,6 +27,20 @@ class VGG(tf.keras.Model):
 			self.section4.add(vgg_feats[i])
 		for i in range(13,18): 
 			self.section5.add(vgg_feats[i])
+		
+		# According to model provided in NVLabs code in architecture.py
+		# for i in range(1,2): 
+		# 	self.section1.add(vgg_feats[i])
+		# for i in range(2,7): 
+		# 	self.section2.add(vgg_feats[i])
+		# for i in range(7,12): 
+		# 	self.section3.add(vgg_feats[i])
+		# for i in range(12,21): 
+		# 	self.section4.add(vgg_feats[i])
+		# for i in range(21,30): 
+		# 	print(i)
+		# 	self.section5.add(vgg_feats[i])
+
 
 	def call(self, inputs): 
 		out1 = self.section1(inputs)
@@ -34,6 +48,12 @@ class VGG(tf.keras.Model):
 		out3 = self.section3(out2)
 		out4 = self.section4(out3)
 		out5 = self.section5(out4)
+
+		self.section1.summary()
+		self.section2.summary()
+		self.section3.summary()
+		self.section4.summary()
+		self.section5.summary()
 		return out1, out2, out3, out4, out5
 
 
