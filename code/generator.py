@@ -101,10 +101,9 @@ class SPADEGenerator(tf.keras.Model):
     
     def loss(self, fake_logits, fake_image, real_image):
         # Only hinge loss for now--can add extra losses later
-        #return tf.keras.losses.hinge(tf.zeros_like(fake_logits), fake_logits)
+        hinge_loss = tf.reduce_mean(tf.keras.losses.hinge(tf.zeros_like(fake_logits), fake_logits))
         #return self.bce(tf.ones_like(fake_logits), fake_logits)
-        #return tf.keras.losses.hinge(tf.ones_like(fake_logits), fake_logits)
         #return -tf.reduce_mean(fake_logits)
-        adversarial_loss = 0.5 * tf.reduce_mean((fake_logits - 1)**2) # Using Least squares loss
-        vgg_loss = self.vgg_loss_obj(fake_image, real_image) * self.lambda_vgg
-        return adversarial_loss + vgg_loss
+        #adversarial_loss = tf.math.multiply(0.5,tf.reduce_mean((fake_logits - 1)**2)) # Using Least squares loss
+        vgg_loss = tf.math.multiply(self.vgg_loss_obj(fake_image, real_image), self.lambda_vgg)
+        return tf.math.divide(tf.math.add(hinge_loss, vgg_loss), 2)

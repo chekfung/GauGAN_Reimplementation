@@ -26,6 +26,9 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
 
     :return: an iterator into the dataset
     """
+    objects_file = './data/objects_we_want.txt'
+    f = open(objects_file, 'r')
+    num_objects = len(f.read().split())
     # Function used to load and pre-process image files
     # (Have to define this ahead of time b/c Python does allow multi-line
     #    lambdas, *grumble*)
@@ -46,6 +49,26 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
         # Rescale data to range (-1, 1)
         #image = (image - 0.5) * 2
         return image
+    
+    def load_and_process_segmap(file_path):
+        """
+        Given a file path, this function opens and decodes the image stored in the file.
+
+        :param file_path: a batch of images
+
+        :return: a one-hot encoded segmap
+        """
+        # Load image
+        image = tf.io.decode_png(tf.io.read_file(file_path), channels=1) # Grayscale already, so transform to 2D grayscale array
+        image = tf.squeeze(image)
+        # Convert image to normalized float (0, 1)
+        image = tf.image.convert_image_dtype(image, tf.float32) * num_objects
+        image = tf.cast(image, tf.uint8)
+        one_hot = tf.one_hot(image, num_objects)
+
+        # Rescale data to range (-1, 1)
+        #image = (image - 0.5) * 2
+        return one_hot
     
     def augment(image, segmap):
         """
@@ -101,7 +124,7 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
         # image_path = 'a'
 
         # Load in image pair to return
-        segmap = load_and_process_image(segmap_path)
+        segmap = load_and_process_segmap(segmap_path)
 
 
         #segmap = tf.convert_to_tensor(np.load(segmap_path))
