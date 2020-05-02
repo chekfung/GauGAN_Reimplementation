@@ -20,7 +20,7 @@ import argparse
 
 from code.discriminator import Discriminator 
 from code.generator import SPADEGenerator
-from preprocess import load_image_batch
+from code.preprocess import load_image_batch
 
 # Killing optional CPU driver warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
