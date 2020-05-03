@@ -22,7 +22,7 @@ HEIGHT = 96
 WIDTH = 128
 
 # Number of object list items required for an image to be included
-UNIQUE_APPROVED_OBJECTS_REQUIRED = 2
+UNIQUE_APPROVED_OBJECTS_REQUIRED = 3
 
 # Schema to separate the files from each other.
 
@@ -213,6 +213,10 @@ def split_files_by_object(files_by_object):
 
 def save_shrunken_image(img, train_dir, test_dir, whether_training):
 
+    # Skip over any files that have parts_1 or parts_2 in filename
+    if '_parts_' in img:
+        return
+
     filename = os.path.basename(img)
 
     # load each image and put in correct folder
@@ -228,7 +232,14 @@ def save_shrunken_image(img, train_dir, test_dir, whether_training):
         #print("Saving testing image " + f)
 
 def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_training):
-    # TODO: Depending on how testing works, implement the seg map values from 0 to n where 0 represents bad values that we do not want.
+    
+    # Skip over any files that have parts_1 or parts_2 in filename
+    if '_parts_' in img:
+        return
+
+    # DONE: Depending on how testing works, implement the seg map values from 
+    # 0 to n where 0 represents bad values that we do not want (achieved with
+    # 255 multiplication and int casting and 255 mult. in innermost for loop)
     filename = os.path.basename(img)
     #print(filename)
     total_num_approved_words = len(approved_words)
@@ -323,40 +334,40 @@ def main():
     # Get list of objects we want and filepaths for object-wise selection
     files_by_object, object_names = get_images_by_object()
 
-    # # Add Training images by explicit scene - from ADE20K Train set
-    # explicit_filepaths = find_explicit_files(data_set_path, train=True)
+    # Add Training images by explicit scene - from ADE20K Train set
+    explicit_filepaths = find_explicit_files(data_set_path, train=True)
     
-    # for filepath in explicit_filepaths:
-    #     imgs, segs = get_explicit_files(filepath)
+    for filepath in explicit_filepaths:
+        imgs, segs = get_explicit_files(filepath)
 
-    #     for img in imgs:
-    #         save_shrunken_image(img, train_dir, test_dir, whether_training=True)
+        for img in imgs:
+            save_shrunken_image(img, train_dir, test_dir, whether_training=True)
         
-    #     for seg in segs:
-    #         # Sets all segmap regions that contain objects NOT in our list of
-    #         # relevant objects to pixel value 0
-    #         save_shrunken_segmap(seg, object_names, train_dir, test_dir, whether_training=True)
+        for seg in segs:
+            # Sets all segmap regions that contain objects NOT in our list of
+            # relevant objects to pixel value 0
+            save_shrunken_segmap(seg, object_names, train_dir, test_dir, whether_training=True)
 
-    # print("Done loading resized Training data selected explicitly by scene")
+    print("Done loading resized Training data selected explicitly by scene")
 
-    # # Add Testing images by explicit scene - from ADE20K Validation set
-    # explicit_filepaths = find_explicit_files(os.path.join('ADE20K_2016_07_26', 'images'), train=False)
+    # Add Testing images by explicit scene - from ADE20K Validation set
+    explicit_filepaths = find_explicit_files(os.path.join('ADE20K_2016_07_26', 'images'), train=False)
 
-    # # For the testing/validation set
-    # for filepath in explicit_filepaths:
-    #     imgs, segs = get_explicit_files(filepath)
+    # For the testing/validation set
+    for filepath in explicit_filepaths:
+        imgs, segs = get_explicit_files(filepath)
 
-    #     for img in imgs:
-    #         save_shrunken_image(img, train_dir, test_dir, whether_training=False)
-    #     for seg in segs:
-    #         save_shrunken_segmap(seg, object_names, train_dir, test_dir, whether_training=False)
+        for img in imgs:
+            save_shrunken_image(img, train_dir, test_dir, whether_training=False)
+        for seg in segs:
+            save_shrunken_segmap(seg, object_names, train_dir, test_dir, whether_training=False)
 
-    # # Remove parts2 files (necessary for explicit scene selection)
+    # Remove parts2 files (necessary for explicit scene selection)
 
-    # remove_parts_two(test_dir)
-    # remove_parts_two(train_dir)
+    remove_parts_two(test_dir)
+    remove_parts_two(train_dir)
 
-    # print("Done loading resized Testing data selected explicitly by scene")
+    print("Done loading resized Testing data selected explicitly by scene")
 
     training_images, training_segs, testing_images, testing_segs = split_files_by_object(files_by_object)
 
