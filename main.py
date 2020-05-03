@@ -80,7 +80,7 @@ parser.add_argument('--img-w', type=int, default=128,
 parser.add_argument('--segmap-filters', type=int, default=19,
 					help='number of filters in the segmap one hot encoding')
 
-parser.add_argument('--lambda-vgg', type=float, default=0,
+parser.add_argument('--lambda-vgg', type=float, default=0.1,
 					help='weight of vgg loss in generator')
 
 parser.add_argument('--log-every', type=int, default=7,
