@@ -43,8 +43,8 @@ def find_explicit_files(data_set_path, train=True):
         orig_path = os.path.join(sys.path[0], data_set_path, 'validation')
 
     file_categories = []
-    filename = 'test_explicit.txt'
-    # filename = 'explicit_cv_landscapes_final_project.txt'
+    # filename = 'test_explicit.txt'
+    filename = 'explicit_cv_landscapes_final_project.txt'
 
     # Get all the file categories that we want (Should be 47)
     with open(os.path.join(sys.path[0], filename)) as f:
@@ -79,8 +79,8 @@ def get_images_by_object():
     """
 
     object_names = []
-    # list_of_objects = 'objects_we_want.txt'
-    list_of_objects = 'test_object_selection.txt'
+    list_of_objects = 'objects_we_want.txt'
+    # list_of_objects = 'test_object_selection.txt'
 
     # Get all the object names that we want
     with open(os.path.join(sys.path[0], list_of_objects)) as f:
@@ -319,6 +319,8 @@ def main():
     train_dir, test_dir = make_save_dir(file_dir)
     
     data_set_path = os.path.join('ADE20K_2016_07_26', 'images')
+    
+    # Get list of objects we want and filepaths for object-wise selection
     files_by_object, object_names = get_images_by_object()
 
     # Add Training images by explicit scene - from ADE20K Train set
@@ -355,10 +357,6 @@ def main():
     remove_parts_two(train_dir)
 
     print("Done loading resized Testing data selected explicitly by scene")
-
-    # Add images by object content
-    # List of .jpg images that contain content we want
-    files_by_object, object_names = get_images_by_object()
 
     training_images, training_segs, testing_images, testing_segs = split_files_by_object(files_by_object)
 

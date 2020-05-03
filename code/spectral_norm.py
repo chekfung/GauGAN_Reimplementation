@@ -33,3 +33,10 @@ def spectral_norm(w, iteration=1):
 
 
 	return w_norm
+
+def spectral_conv(inputs, weight, stride, bias=None): 
+	x = tf.nn.conv2d(input=inputs, filter=spectral_norm(weight), strides=stride, padding="SAME")
+	if bias != None: 
+		x = tf.nn.bias_add(x, bias)
+	return x
+	
