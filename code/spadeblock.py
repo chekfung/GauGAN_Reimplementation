@@ -6,7 +6,7 @@ from code.spectral_norm import spectral_conv
 from tensorflow.nn import conv2d, bias_add
 
 class SpadeBlock(Layer): 
-	def __init__(self, fin, fout, use_bias=True, use_spectral=True, skip=False): 
+	def __init__(self, fin, fout, segmap_filters, use_bias=True, use_spectral=True, skip=False): 
 		super(SpadeBlock, self).__init__()
 		#self.use_spectral = use_spectral 
 
@@ -39,11 +39,11 @@ class SpadeBlock(Layer):
 		if self.learned_shortcut: 
 			self.conv_s = tf.Variable(self.glorot(shape=[1,1,fin,fout]))
 
-		self.spade0 = SpadeLayer(out_channels=fin)
-		self.spade1 = SpadeLayer(out_channels=fmiddle)
+		self.spade0 = SpadeLayer(in_channels=segmap_filters, out_channels=fin)
+		self.spade1 = SpadeLayer(in_channels=segmap_filters, out_channels=fmiddle)
 		#self.spade_s = SpadeLayer(out_channels=fin) #comment 
 		if self.learned_shortcut: 
-			self.spade_s = SpadeLayer(out_channels=fin)
+			self.spade_s = SpadeLayer(in_channels=segmap_filters, out_channels=fin)
 		self.relu = ReLU()
 
 	def call(self, features, segmap): 
@@ -65,15 +65,15 @@ class SpadeBlock(Layer):
 		else: 
 			skip = features
 			x = self.relu(self.spade0(features, segmap))
-			x = conv2d(x, self.conv0, [1,1,1,1], "SAME")
-			x = bias_add(x, self.bias0)
+			x = tf.nn.conv2d(x, self.conv0, [1,1,1,1], "SAME")
+			x = tf.nn.bias_add(x, self.bias0)
 			x = self.relu(self.spade1(x, segmap))
-			x = conv2d(x, self.conv1, [1,1,1,1], "SAME")
-			x = bias_add(x, self.bias1)
+			x = tf.nn.conv2d(x, self.conv1, [1,1,1,1], "SAME")
+			x = tf.nn.bias_add(x, self.bias1)
 
 			if self.learned_shortcut: 
 				skip = self.relu(self.spade_s(skip, segmap))
-				skip = conv2d(skip, self.conv_s, [1,1,1,1], "SAME")
+				skip = tf.nn.conv2d(skip, self.conv_s, [1,1,1,1], "SAME")
 
 		return tf.math.add(skip, x)
 	
