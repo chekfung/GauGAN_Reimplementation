@@ -77,7 +77,7 @@ parser.add_argument('--img-h', type=int, default=96,
 parser.add_argument('--img-w', type=int, default=128,
 					help='width of image')
 
-parser.add_argument('--lambda-vgg', type=float, default=0,
+parser.add_argument('--lambda-vgg', type=float, default=0.001,
 					help='weight of vgg loss in generator')
 
 parser.add_argument('--log-every', type=int, default=7,

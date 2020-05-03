@@ -22,7 +22,7 @@ HEIGHT = 96
 WIDTH = 128
 
 # Number of object list items required for an image to be included
-UNIQUE_APPROVED_OBJECTS_REQUIRED = 2
+UNIQUE_APPROVED_OBJECTS_REQUIRED = 3
 
 # Schema to separate the files from each other.
 
@@ -43,7 +43,7 @@ def find_explicit_files(data_set_path, train=True):
         orig_path = os.path.join(sys.path[0], data_set_path, 'validation')
 
     file_categories = []
-    filename = 'test_explicit.txt'
+    filename = 'explicit_cv_landscapes_final_project.txt'
     # filename = 'explicit_cv_landscapes_final_project.txt'
 
     # Get all the file categories that we want (Should be 47)
@@ -80,7 +80,7 @@ def get_images_by_object():
 
     object_names = []
     # list_of_objects = 'objects_we_want.txt'
-    list_of_objects = 'test_object_selection.txt'
+    list_of_objects = 'objects_we_want.txt'
 
     # Get all the object names that we want
     with open(os.path.join(sys.path[0], list_of_objects)) as f:
@@ -267,7 +267,7 @@ def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_train
                 break
         
         if approved_code:
-            print(img_object_name + " is approved")
+            #print(img_object_name + " is approved")
             num_approved_words_in_img = num_approved_words_in_img + 1
             # do not change pixel values for approved objects
         else:
@@ -276,13 +276,13 @@ def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_train
             
     # Image does not contain sufficient number of different objects 
     # -> don't include it
-    if num_approved_words_in_img < UNIQUE_APPROVED_OBJECTS_REQUIRED:
-        print("Tossing out " + filename + " because it doesn't have enough unique objects on our list")
-        if whether_training:
-            os.remove(os.path.join(train_dir, filename[:-8] + '.jpg'))
-        else:
-            os.remove(os.path.join(test_dir, filename[:-8] + '.jpg'))
-        return
+    # if num_approved_words_in_img < UNIQUE_APPROVED_OBJECTS_REQUIRED:
+    #     print("Tossing out " + filename + " because it doesn't have enough unique objects on our list")
+    #     if whether_training:
+    #         os.remove(os.path.join(train_dir, filename[:-8] + '.jpg'))
+    #     else:
+    #         os.remove(os.path.join(test_dir, filename[:-8] + '.jpg'))
+    #     return
 
         '''
          This^^ implementation leaves object codes in their original integer encodings 
@@ -300,16 +300,14 @@ def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_train
     if whether_training:
         f = os.path.join(train_dir, filename)
         npy_path = os.path.join(train_dir,generic_filename)
-        print("Resized segmap is ", resized_segmap)
-        print("Shape is ", resized_segmap.shape)
+        #print("Resized segmap is ", resized_segmap)
+        #print("Shape is ", resized_segmap.shape)
         imsave(f, resized_segmap)
-        np.savetxt(npy_path + '.csv', npy_segmap, delimiter=",")
         #print("Saving training segmap " + f)
     else:
         f = os.path.join(test_dir, filename)
         npy_path = os.path.join(test_dir,generic_filename)
         imsave(f, resized_segmap)
-        np.savetxt(npy_path + '.csv', npy_segmap, delimiter=",")
         #print("Saving testing segmap " + f)
 
 def main():        
@@ -358,25 +356,25 @@ def main():
 
     # Add images by object content
     # List of .jpg images that contain content we want
-    files_by_object, object_names = get_images_by_object()
+    # files_by_object, object_names = get_images_by_object()
 
-    training_images, training_segs, testing_images, testing_segs = split_files_by_object(files_by_object)
+    # training_images, training_segs, testing_images, testing_segs = split_files_by_object(files_by_object)
 
-    for img in training_images:
-        save_shrunken_image(img, train_dir, test_dir, whether_training=True)
+    # for img in training_images:
+    #     save_shrunken_image(img, train_dir, test_dir, whether_training=True)
     
-    for seg in training_segs:
-        save_shrunken_segmap(seg, object_names, train_dir, test_dir, whether_training=True)
+    # for seg in training_segs:
+    #     save_shrunken_segmap(seg, object_names, train_dir, test_dir, whether_training=True)
 
-    print("Done loading resized Training data selected by object content")
+    # print("Done loading resized Training data selected by object content")
 
-    for img in testing_images:
-        save_shrunken_image(img, train_dir, test_dir, whether_training=False) 
+    # for img in testing_images:
+    #     save_shrunken_image(img, train_dir, test_dir, whether_training=False) 
 
-    for seg in testing_segs:
-        save_shrunken_segmap(seg, object_names, train_dir, test_dir, whether_training=False)
+    # for seg in testing_segs:
+    #     save_shrunken_segmap(seg, object_names, train_dir, test_dir, whether_training=False)
     
-    print("Done loading resized Testing data selected by object content")
+    # print("Done loading resized Testing data selected by object content")
 
 if __name__ == "__main__":
     main()
