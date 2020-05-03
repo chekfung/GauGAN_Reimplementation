@@ -267,7 +267,7 @@ def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_train
                 break
         
         if approved_code:
-            print(img_object_name + " is approved")
+            # print(img_object_name + " is approved")
             num_approved_words_in_img = num_approved_words_in_img + 1
             # do not change pixel values for approved objects
         else:
@@ -277,7 +277,7 @@ def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_train
     # Image does not contain sufficient number of different objects 
     # -> don't include it
     if num_approved_words_in_img < UNIQUE_APPROVED_OBJECTS_REQUIRED:
-        print("Tossing out " + filename + " because it doesn't have enough unique objects on our list")
+        # print("Tossing out " + filename + " because it doesn't have enough unique objects on our list")
         if whether_training:
             os.remove(os.path.join(train_dir, filename[:-8] + '.jpg'))
         else:
@@ -300,16 +300,16 @@ def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_train
     if whether_training:
         f = os.path.join(train_dir, filename)
         npy_path = os.path.join(train_dir,generic_filename)
-        print("Resized segmap is ", resized_segmap)
-        print("Shape is ", resized_segmap.shape)
+        # print("Resized segmap is ", resized_segmap)
+        # print("Shape is ", resized_segmap.shape)
         imsave(f, resized_segmap)
-        np.savetxt(npy_path + '.csv', npy_segmap, delimiter=",")
+        # np.savetxt(npy_path + '.csv', npy_segmap, delimiter=",")
         #print("Saving training segmap " + f)
     else:
         f = os.path.join(test_dir, filename)
         npy_path = os.path.join(test_dir,generic_filename)
         imsave(f, resized_segmap)
-        np.savetxt(npy_path + '.csv', npy_segmap, delimiter=",")
+        # np.savetxt(npy_path + '.csv', npy_segmap, delimiter=",")
         #print("Saving testing segmap " + f)
 
 def main():        
@@ -323,40 +323,40 @@ def main():
     # Get list of objects we want and filepaths for object-wise selection
     files_by_object, object_names = get_images_by_object()
 
-    # Add Training images by explicit scene - from ADE20K Train set
-    explicit_filepaths = find_explicit_files(data_set_path, train=True)
+    # # Add Training images by explicit scene - from ADE20K Train set
+    # explicit_filepaths = find_explicit_files(data_set_path, train=True)
     
-    for filepath in explicit_filepaths:
-        imgs, segs = get_explicit_files(filepath)
+    # for filepath in explicit_filepaths:
+    #     imgs, segs = get_explicit_files(filepath)
 
-        for img in imgs:
-            save_shrunken_image(img, train_dir, test_dir, whether_training=True)
+    #     for img in imgs:
+    #         save_shrunken_image(img, train_dir, test_dir, whether_training=True)
         
-        for seg in segs:
-            # Sets all segmap regions that contain objects NOT in our list of
-            # relevant objects to pixel value 0
-            save_shrunken_segmap(seg, object_names, train_dir, test_dir, whether_training=True)
+    #     for seg in segs:
+    #         # Sets all segmap regions that contain objects NOT in our list of
+    #         # relevant objects to pixel value 0
+    #         save_shrunken_segmap(seg, object_names, train_dir, test_dir, whether_training=True)
 
-    print("Done loading resized Training data selected explicitly by scene")
+    # print("Done loading resized Training data selected explicitly by scene")
 
-    # Add Testing images by explicit scene - from ADE20K Validation set
-    explicit_filepaths = find_explicit_files(os.path.join('ADE20K_2016_07_26', 'images'), train=False)
+    # # Add Testing images by explicit scene - from ADE20K Validation set
+    # explicit_filepaths = find_explicit_files(os.path.join('ADE20K_2016_07_26', 'images'), train=False)
 
-    # For the testing/validation set
-    for filepath in explicit_filepaths:
-        imgs, segs = get_explicit_files(filepath)
+    # # For the testing/validation set
+    # for filepath in explicit_filepaths:
+    #     imgs, segs = get_explicit_files(filepath)
 
-        for img in imgs:
-            save_shrunken_image(img, train_dir, test_dir, whether_training=False)
-        for seg in segs:
-            save_shrunken_segmap(seg, object_names, train_dir, test_dir, whether_training=False)
+    #     for img in imgs:
+    #         save_shrunken_image(img, train_dir, test_dir, whether_training=False)
+    #     for seg in segs:
+    #         save_shrunken_segmap(seg, object_names, train_dir, test_dir, whether_training=False)
 
-    # Remove parts2 files (necessary for explicit scene selection)
+    # # Remove parts2 files (necessary for explicit scene selection)
 
-    remove_parts_two(test_dir)
-    remove_parts_two(train_dir)
+    # remove_parts_two(test_dir)
+    # remove_parts_two(train_dir)
 
-    print("Done loading resized Testing data selected explicitly by scene")
+    # print("Done loading resized Testing data selected explicitly by scene")
 
     training_images, training_segs, testing_images, testing_segs = split_files_by_object(files_by_object)
 
