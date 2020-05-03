@@ -77,7 +77,7 @@ parser.add_argument('--img-h', type=int, default=96,
 parser.add_argument('--img-w', type=int, default=128,
 					help='width of image')
 
-parser.add_argument('--segmap-filters', type=int, default=18,
+parser.add_argument('--segmap-filters', type=int, default=19,
 					help='number of filters in the segmap one hot encoding')
 
 parser.add_argument('--lambda-vgg', type=float, default=0,
