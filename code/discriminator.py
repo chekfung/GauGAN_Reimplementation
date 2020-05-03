@@ -47,6 +47,7 @@ class Discriminator(Model):
 
         # Final Convolutional Layer, as like PatchGAN implementation
         self.conv5 = tf.Variable(self.glorot(shape=[KERNEL_SIZE, KERNEL_SIZE, 512, 1]))
+        self.bias5 = tf.Variable(self.glorot(shape=[1]))
 
         # In weird pytorch code 
         self.inorm4 = InstanceNormalization()
