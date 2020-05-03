@@ -59,10 +59,10 @@ parser.add_argument('--num-data-threads', type=int, default=8,
 parser.add_argument('--num-epochs', type=int, default=200,
 					help='Number of passes through the training data to make before stopping')
 
-parser.add_argument('--gen-learn-rate', type=float, default=0.0002,
+parser.add_argument('--gen-learn-rate', type=float, default=0.0001,
 					help='Learning rate for Generator Adam optimizer')
 
-parser.add_argument('--dsc-learn-rate', type=float, default=0.0003,
+parser.add_argument('--dsc-learn-rate', type=float, default=0.0005,
 					help='Learning rate for Discriminator Adam optimizer')
 
 parser.add_argument('--beta1', type=float, default=0,
@@ -77,7 +77,7 @@ parser.add_argument('--img-h', type=int, default=96,
 parser.add_argument('--img-w', type=int, default=128,
 					help='width of image')
 
-parser.add_argument('--lambda-vgg', type=float, default= 1,#0.01,
+parser.add_argument('--lambda-vgg', type=float, default=0,
 					help='weight of vgg loss in generator')
 
 parser.add_argument('--log-every', type=int, default=7,
@@ -195,6 +195,12 @@ def train(generator, discriminator, dataset_iterator, manager):
 				s = "logs/generated_samples"+'/'+str(EPOCH_COUNT)+'.png'
 				img_i = gen_output[0] * 255
 				imwrite(s, img_i)
+
+				# real image for funs 
+				path = "logs/generated_samples"+'/'+str(EPOCH_COUNT)+'_real.png'
+				reals = images[0] * 255
+				imwrite(path, reals)
+
 
 				# plt.figure(1)
 				# for n in range(16):

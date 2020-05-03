@@ -59,7 +59,7 @@ class SPADEGenerator(tf.keras.Model):
 
         # Conv2D based off seg map noise
         result = tf.image.resize(segs, size=(self.sh, self.sw), method="nearest")
-        result = self.fc(result)
+        result = spectral_norm(self.fc(result))
 
         # Dense Random Noise
         #result = self.dense(noise)

@@ -48,12 +48,7 @@ class VGG(tf.keras.Model):
 		out3 = self.section3(out2)
 		out4 = self.section4(out3)
 		out5 = self.section5(out4)
-
-		self.section1.summary()
-		self.section2.summary()
-		self.section3.summary()
-		self.section4.summary()
-		self.section5.summary()
+		
 		return out1, out2, out3, out4, out5
 
 
