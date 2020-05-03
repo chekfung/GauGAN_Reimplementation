@@ -49,9 +49,7 @@ class Discriminator(Model):
         self.bce = tf.keras.losses.BinaryCrossentropy()
 
     def call(self, inputs, segmaps):
-        _, x_h, x_w, _ = list(segmaps.shape)
-        inputs_resized = tf.image.resize(inputs, size=(x_h, x_w), method="nearest")
-        x = tf.concat([segmaps, inputs_resized], axis=-1)
+        x = tf.concat([segmaps, inputs], axis=-1)
         
         # First layer
         x = self.conv1(x)

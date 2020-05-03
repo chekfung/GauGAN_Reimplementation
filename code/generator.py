@@ -2,12 +2,12 @@ import numpy as np
 import tensorflow as tf
 from code.spadeblock import SpadeBlock
 from tensorflow.keras.layers import UpSampling2D, LeakyReLU, Conv2D, Dense
-from code.spectral import spectral_norm
+from code.spectral import spectral_conv
 from code.vgg import VGG_Loss
 
 class SPADEGenerator(tf.keras.Model):
     def __init__(self, beta1=0.5, beta2=0.999, learning_rate=0.0001, batch_size=16, z_dim=64, \
-        img_w=128, img_h=96, lambda_vgg=10):
+        img_w=128, img_h=96, lambda_vgg=10, segmap_filters):
         super(SPADEGenerator, self).__init__()
         
         self.beta1 = beta1
@@ -20,9 +20,11 @@ class SPADEGenerator(tf.keras.Model):
         self.img_w = img_w
         self.img_h = img_h
         self.lambda_vgg = lambda_vgg
+        self.glorot = tf.keras.initializers.GlorotNormal()
 
         self.sw, self.sh = self.compute_latent_vector_size()
-        self.fc = Conv2D(16 * z_dim, kernel_size=3, strides=1, padding="SAME", use_bias=True, dtype=tf.float32)
+        self.fc = tf.Variable(self.glorot(shape=[3,3,segmap_filters,16*z_dim]))
+        Conv2D(16 * z_dim, kernel_size=3, strides=1, padding="SAME", use_bias=True, dtype=tf.float32)
 
         # Not sure what this is for
         #self.dense = tf.keras.layers.Dense(self.sh*self.sw*self.num_channels, dtype=tf.float32)
@@ -34,16 +36,16 @@ class SPADEGenerator(tf.keras.Model):
 
         # SPADE LAYERS
         self.dense = Dense(z_dim * 16 * self.sw * self.sh)
-        self.spade_layers0 = SpadeBlock(16 * nf, 16 * nf)
-        self.spade_layers1 = SpadeBlock(16 * nf, 16 * nf)
-        self.spade_layers2 = SpadeBlock(16 * nf, 16 * nf)
-        self.spade_layers3 = SpadeBlock(16 * nf, 8 * nf)
-        self.spade_layers4 = SpadeBlock(8 * nf, 4 * nf)
-        self.spade_layers5 = SpadeBlock(4 * nf, 2 * nf)
-        self.spade_layers6 = SpadeBlock(2 * nf, 1 * nf)
+        self.spade_layers0 = SpadeBlock(16 * nf, 16 * nf, segmap_filters)
+        self.spade_layers1 = SpadeBlock(16 * nf, 16 * nf, segmap_filters)
+        self.spade_layers2 = SpadeBlock(16 * nf, 16 * nf, segmap_filters)
+        self.spade_layers3 = SpadeBlock(16 * nf, 8 * nf, segmap_filters)
+        self.spade_layers4 = SpadeBlock(8 * nf, 4 * nf, segmap_filters)
+        self.spade_layers5 = SpadeBlock(4 * nf, 2 * nf, segmap_filters)
+        self.spade_layers6 = SpadeBlock(2 * nf, 1 * nf, segmap_filters)
 
-        self.conv_layer = tf.keras.layers.Conv2D(3, (3,3), padding="SAME", \
-            activation='tanh', dtype=tf.float32, kernel_initializer=tf.keras.initializers.GlorotNormal())
+        # filters=3, kernel=3, strides=1
+        self.conv_layer = tf.Variable(self.glorot(shape=[3,3,nf,3]))
 
         # Unsample layer by 2
         self.upsample = UpSampling2D()
