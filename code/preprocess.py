@@ -72,7 +72,6 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
         _, idx = tf.unique(image)
         image = tf.reshape(idx, original_shape)
         one_hot = tf.one_hot(image, num_objects)
-        print("One hot is: ", one_hot)
 
         # Rescale data to range (-1, 1)
         #image = (image - 0.5) * 2

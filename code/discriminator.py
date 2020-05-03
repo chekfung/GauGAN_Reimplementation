@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense, Flatten, Conv2D, BatchNormalization, LeakyReLU, Reshape, Conv2DTranspose 
 from tensorflow_addons.layers import InstanceNormalization
-from code.spectral import spectral_conv
+from code.spectral_norm import spectral_conv
 
 
 # forward is call
@@ -47,6 +47,7 @@ class Discriminator(Model):
 
         # Final Convolutional Layer, as like PatchGAN implementation
         self.conv5 = tf.Variable(self.glorot(shape=[KERNEL_SIZE, KERNEL_SIZE, 512, 1]))
+        self.bias5 = tf.Variable(self.glorot(shape=[1]))
 
         # In weird pytorch code 
         self.inorm4 = InstanceNormalization()

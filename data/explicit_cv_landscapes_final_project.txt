@@ -1,19 +1,15 @@
-bamboo_forest
 badlands
 bayou
 beach
 bog
-butte
 canyon
 canal/natural
-cavern/outdoor
 chaparral
 cliff
 coast
 creek
 desert
 ditch
-dolmen
 escarpment
 estuary
 field/wild
@@ -48,7 +44,6 @@ orchard
 outliers/arcipelago
 outliers/wetland
 pond
-picnic_area
 rainforest
 river
 salt_plain

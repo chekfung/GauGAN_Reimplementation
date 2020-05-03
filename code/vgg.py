@@ -60,10 +60,13 @@ class VGG_Loss(tf.keras.Model):
 		self.loss_function = tf.keras.losses.MeanAbsoluteError()
 		self.weighting = [1/32, 1/16, 1/8, 1/4, 1]
 
-	def call(self, fake, real): 
-		fake_vgg, real_vgg = self.vgg(fake), self.vgg(real)
+	def call(self, real, fake): 
+		fake = ((fake + 1)/2) * 255
+		real = ((real + 1)/2) * 255
+		fake_vgg, real_vgg = self.vgg(preprocess_input(fake)), self.vgg(preprocess_input(real))
 		loss = 0
 		for i in range(len(fake_vgg)): 
-			loss += self.weighting[i] * self.loss_function(fake_vgg[i], real_vgg[i])
+			fake_detach = tf.stop_gradient(fake_vgg[i])
+			loss += self.weighting[i] * self.loss_function(real_vgg[i], fake_detach)
 
 		return loss

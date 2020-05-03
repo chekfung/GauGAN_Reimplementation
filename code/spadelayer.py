@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.layers import Conv2D, BatchNormalization, ReLU, Layer
-from code.spectral import spectral_conv
+from code.spectral_norm import spectral_conv
 
 class SpadeLayer(Layer):
 	def __init__(self, in_channels, out_channels, use_bias=True, hidden_channels=128):
