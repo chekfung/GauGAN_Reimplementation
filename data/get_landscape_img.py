@@ -43,8 +43,8 @@ def find_explicit_files(data_set_path, train=True):
         orig_path = os.path.join(sys.path[0], data_set_path, 'validation')
 
     file_categories = []
+    # filename = 'test_explicit.txt'
     filename = 'explicit_cv_landscapes_final_project.txt'
-    # filename = 'explicit_cv_landscapes_final_project.txt'
 
     # Get all the file categories that we want (Should be 47)
     with open(os.path.join(sys.path[0], filename)) as f:
@@ -61,26 +61,26 @@ def find_explicit_files(data_set_path, train=True):
             path = file
         else:
             path = os.path.join(str(file[0]), file)
-        
+
         real_filepaths.add(os.path.join(orig_path, path))
-    
+
     # print(real_filepaths)
     return real_filepaths
 
 
 def get_images_by_object():
-    
+
     """
     Given objects_we_want.txt, we select images based on whether they contain relevant objects
-    
-    Returns: 
+
+    Returns:
     :real_filepaths - .jpg filepaths to images
     :object_names - list of words of objects we want to include
     """
 
     object_names = []
-    # list_of_objects = 'objects_we_want.txt'
     list_of_objects = 'objects_we_want.txt'
+    # list_of_objects = 'test_object_selection.txt'
 
     # Get all the object names that we want
     with open(os.path.join(sys.path[0], list_of_objects)) as f:
@@ -94,19 +94,19 @@ def get_images_by_object():
     for name in object_names:
 
         #print("Getting files that contain: " + name)
-        
+
         # adeindex = MATLABconversion.ADEIndex()
 
         object_image_matrix = adeindex.object_image_matrix
         image_stats_matrix = adeindex.image_index
 
-        # get all columns where the column title contains name (the object name we're looking for) in a piece of the tile separated by ", " 
+        # get all columns where the column title contains name (the object name we're looking for) in a piece of the tile separated by ", "
         object_cols_that_match = object_image_matrix.loc[:,[string for string in object_image_matrix.columns if name in string.split(", ")]]
 
         # for loop needed here because term could match more than one object category
         for (colName, colData) in object_cols_that_match.iteritems():
             image_rows_to_add = object_image_matrix.loc[object_image_matrix[colName] != 0]
-            
+
             # print("img rows to add are ", image_rows_to_add)
 
             for index, row in image_rows_to_add.iterrows():
@@ -125,7 +125,7 @@ def get_images_by_object():
 
 def get_explicit_files(file_path):
     '''
-    Provided a directory filepath, grabs all of the segmentation maps of the 
+    Provided a directory filepath, grabs all of the segmentation maps of the
     images and all of the actual imgs paths.
 
     Params
@@ -151,12 +151,12 @@ def get_explicit_files(file_path):
     for img in imgs:
         if parts.search(img):
             imgs.remove(img)
-        
+
     return imgs, segs
 
 def load_img(img_filepath, h, w):
     '''
-    Loads img and then resizes to the specified h,w before returning from the 
+    Loads img and then resizes to the specified h,w before returning from the
     function
     '''
     #print("Loading from ", img_filepath)
@@ -250,7 +250,7 @@ def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_train
     # get unique image labels in the decoded segmap (list of contained objects)
     unique_obj_codes = np.unique(object_map)
     # if object is not in our list of approved objects, then set all pixels of this object to 0
-    num_approved_words_in_img = 0  
+    num_approved_words_in_img = 0
     for code in unique_obj_codes:
         # the MATLAB indexing fix described above /should/ prevent this from being a key error
         img_object_name = adeindex.object_name_list['objectnames'].loc[code - 1]
@@ -265,28 +265,28 @@ def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_train
                 object_map[parts_of_object_map_with_this_object] = int(255*(word_index + 1)/total_num_approved_words)
                 approved_code = True
                 break
-        
+
         if approved_code:
-            #print(img_object_name + " is approved")
+            # print(img_object_name + " is approved")
             num_approved_words_in_img = num_approved_words_in_img + 1
             # do not change pixel values for approved objects
         else:
             parts_of_object_map_with_this_object = object_map == code
             object_map[parts_of_object_map_with_this_object] = 0
-            
-    # Image does not contain sufficient number of different objects 
+
+    # Image does not contain sufficient number of different objects
     # -> don't include it
-    # if num_approved_words_in_img < UNIQUE_APPROVED_OBJECTS_REQUIRED:
-    #     print("Tossing out " + filename + " because it doesn't have enough unique objects on our list")
-    #     if whether_training:
-    #         os.remove(os.path.join(train_dir, filename[:-8] + '.jpg'))
-    #     else:
-    #         os.remove(os.path.join(test_dir, filename[:-8] + '.jpg'))
-    #     return
+    if num_approved_words_in_img < UNIQUE_APPROVED_OBJECTS_REQUIRED:
+        # print("Tossing out " + filename + " because it doesn't have enough unique objects on our list")
+        if whether_training:
+            os.remove(os.path.join(train_dir, filename[:-8] + '.jpg'))
+        else:
+            os.remove(os.path.join(test_dir, filename[:-8] + '.jpg'))
+        return
 
         '''
-         This^^ implementation leaves object codes in their original integer encodings 
-         --> DOES NOT re-enumerate from 0 to n objects, because counting how many objects 
+         This^^ implementation leaves object codes in their original integer encodings
+         --> DOES NOT re-enumerate from 0 to n objects, because counting how many objects
             our words match to, and then enumerating the matches, is a pain
         '''
 
@@ -296,7 +296,7 @@ def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_train
     resized_segmap = tf.image.resize(object_map[:,:,np.newaxis], size=(HEIGHT, WIDTH), method='nearest')[:,:,0]
     npy_segmap = np.array(resized_segmap)
     generic_filename, ext = os.path.splitext(filename)
-    
+
     if whether_training:
         f = os.path.join(train_dir, filename)
         npy_path = os.path.join(train_dir,generic_filename)
@@ -310,76 +310,73 @@ def save_shrunken_segmap(img, approved_words, train_dir, test_dir, whether_train
         imsave(f, resized_segmap)
         #print("Saving testing segmap " + f)
 
-def main():        
+def main():
     # Create the file directories to house the new resized imgs
     file_dir = 'landscape_data'
 
     train_dir, test_dir = make_save_dir(file_dir)
-    
+
     data_set_path = os.path.join('ADE20K_2016_07_26', 'images')
+
+    # Get list of objects we want and filepaths for object-wise selection
     files_by_object, object_names = get_images_by_object()
 
-    # Add Training images by explicit scene - from ADE20K Train set
-    explicit_filepaths = find_explicit_files(data_set_path, train=True)
-    
-    for filepath in explicit_filepaths:
-        imgs, segs = get_explicit_files(filepath)
+    # # Add Training images by explicit scene - from ADE20K Train set
+    # explicit_filepaths = find_explicit_files(data_set_path, train=True)
 
-        for img in imgs:
-            save_shrunken_image(img, train_dir, test_dir, whether_training=True)
-        
-        for seg in segs:
-            # Sets all segmap regions that contain objects NOT in our list of
-            # relevant objects to pixel value 0
-            save_shrunken_segmap(seg, object_names, train_dir, test_dir, whether_training=True)
+    # for filepath in explicit_filepaths:
+    #     imgs, segs = get_explicit_files(filepath)
 
-    print("Done loading resized Training data selected explicitly by scene")
+    #     for img in imgs:
+    #         save_shrunken_image(img, train_dir, test_dir, whether_training=True)
 
-    # Add Testing images by explicit scene - from ADE20K Validation set
-    explicit_filepaths = find_explicit_files(os.path.join('ADE20K_2016_07_26', 'images'), train=False)
+    #     for seg in segs:
+    #         # Sets all segmap regions that contain objects NOT in our list of
+    #         # relevant objects to pixel value 0
+    #         save_shrunken_segmap(seg, object_names, train_dir, test_dir, whether_training=True)
 
-    # For the testing/validation set
-    for filepath in explicit_filepaths:
-        imgs, segs = get_explicit_files(filepath)
+    # print("Done loading resized Training data selected explicitly by scene")
 
-        for img in imgs:
-            save_shrunken_image(img, train_dir, test_dir, whether_training=False)
-        for seg in segs:
-            save_shrunken_segmap(seg, object_names, train_dir, test_dir, whether_training=False)
+    # # Add Testing images by explicit scene - from ADE20K Validation set
+    # explicit_filepaths = find_explicit_files(os.path.join('ADE20K_2016_07_26', 'images'), train=False)
 
-    # Remove parts2 files (necessary for explicit scene selection)
+    # # For the testing/validation set
+    # for filepath in explicit_filepaths:
+    #     imgs, segs = get_explicit_files(filepath)
 
-    remove_parts_two(test_dir)
-    remove_parts_two(train_dir)
+    #     for img in imgs:
+    #         save_shrunken_image(img, train_dir, test_dir, whether_training=False)
+    #     for seg in segs:
+    #         save_shrunken_segmap(seg, object_names, train_dir, test_dir, whether_training=False)
 
-    print("Done loading resized Testing data selected explicitly by scene")
+    # # Remove parts2 files (necessary for explicit scene selection)
+
+    # remove_parts_two(test_dir)
+    # remove_parts_two(train_dir)
+
+    # print("Done loading resized Testing data selected explicitly by scene")
 
     # Add images by object content
     # List of .jpg images that contain content we want
-    # files_by_object, object_names = get_images_by_object()
+
 
     # training_images, training_segs, testing_images, testing_segs = split_files_by_object(files_by_object)
 
     # for img in training_images:
     #     save_shrunken_image(img, train_dir, test_dir, whether_training=True)
-    
+
     # for seg in training_segs:
     #     save_shrunken_segmap(seg, object_names, train_dir, test_dir, whether_training=True)
 
     # print("Done loading resized Training data selected by object content")
 
     # for img in testing_images:
-    #     save_shrunken_image(img, train_dir, test_dir, whether_training=False) 
+    #     save_shrunken_image(img, train_dir, test_dir, whether_training=False)
 
     # for seg in testing_segs:
     #     save_shrunken_segmap(seg, object_names, train_dir, test_dir, whether_training=False)
-    
+
     # print("Done loading resized Testing data selected by object content")
 
 if __name__ == "__main__":
     main()
-
-
-
-
-

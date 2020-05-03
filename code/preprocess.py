@@ -65,8 +65,12 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
         image = tf.squeeze(image)
         # Charlie does not think we should be normalizing the segmaps
         # # Convert image to normalized float (0, 1)
-        # image = tf.image.convert_image_dtype(image, tf.float32) * num_objects
-        # image = tf.cast(image, tf.uint8)
+        image = tf.image.convert_image_dtype(image, tf.uint8) * num_objects
+        image = tf.cast(image, tf.int32)
+        original_shape = tf.shape(image)
+        image = tf.reshape(image, shape=(-1,))
+        _, idx = tf.unique(image)
+        image = tf.reshape(idx, original_shape)
         one_hot = tf.one_hot(image, num_objects)
 
         # Rescale data to range (-1, 1)

@@ -1,8 +1,9 @@
 from code.spadelayer import SpadeLayer
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras.layers import Conv2D, BatchNormalization, LeakyReLU, Layer, ReLU
-from code.spectral import spectral_norm
+from tensorflow.keras.layers import BatchNormalization, LeakyReLU, Layer, ReLU
+from code.spectral import spectral_conv
+from tensorflow.nn import conv2d, bias_add
 
 class SpadeBlock(Layer): 
 	def __init__(self, fin, fout, use_bias=True, use_spectral=True, skip=False): 
@@ -26,16 +27,18 @@ class SpadeBlock(Layer):
 		self.use_spectral = use_spectral
 		self.learned_shortcut = (fin != fout)
 		fmiddle = min(fin, fout)
+		self.glorot = tf.keras.initializers.GlorotNormal()
 		
-		self.conv0 = Conv2D(filters=fmiddle, kernel_size=3, strides=1, padding="SAME", \
-			use_bias=use_bias, dtype=tf.float32, kernel_initializer=tf.keras.initializers.GlorotNormal())
-		self.conv1 = Conv2D(filters=fout, kernel_size=3, strides=1, padding="SAME", \
-			use_bias=use_bias, dtype=tf.float32, kernel_initializer=tf.keras.initializers.GlorotNormal())
-		#self.conv_s = Conv2D(filters=fout, kernel_size=1, strides=1, padding="SAME", use_bias=False) # comment
+		# filters out = fmiddle, kernel=3, strides=1
+		self.conv0 = tf.Variable(self.glorot(shape=[3,3,fin,fmiddle]))
+		self.bias0 = tf.Variable(self.glorot(shape=[fmiddle]))
+		# filters out = fout, kernel=3, strides=1
+		self.conv1 = tf.Variable(self.glorot(shape=[3,3,fmiddle,fout]))
+		self.bias1 = tf.Variable(self.glorot(shape=[fout]))
+		# filters out = fout, kernel=1, strides=1
 		if self.learned_shortcut: 
-			self.conv_s = Conv2D(filters=fout, kernel_size=1, strides=1, padding="SAME", \
-				use_bias=False, dtype=tf.float32, kernel_initializer=tf.keras.initializers.GlorotNormal())
-		
+			self.conv_s = tf.Variable(self.glorot(shape=[1,1,fin,fout]))
+
 		self.spade0 = SpadeLayer(out_channels=fin)
 		self.spade1 = SpadeLayer(out_channels=fmiddle)
 		#self.spade_s = SpadeLayer(out_channels=fin) #comment 
@@ -52,23 +55,25 @@ class SpadeBlock(Layer):
 		if self.use_spectral: 
 			skip = features
 			x = self.relu(self.spade0(features, segmap))
-			x = spectral_norm(self.conv0(x))
+			x = spectral_conv(inputs=x, weight=self.conv0, stride=1, bias=self.bias0)
 			x = self.relu(self.spade1(x, segmap))
-			x = spectral_norm(self.conv1(x))
+			x = spectral_conv(inputs=x, weight=self.conv1, stride=1, bias=self.bias1)
 
 			if self.learned_shortcut: 
 				skip = self.relu(self.spade_s(skip, segmap))
-				skip = spectral_norm(self.conv_s(skip))
+				skip = spectral_conv(inputs=skip, weight=self.conv_s, stride=1)
 		else: 
 			skip = features
 			x = self.relu(self.spade0(features, segmap))
-			x = self.conv0(x)
+			x = conv2d(x, self.conv0, [1,1,1,1], "SAME")
+			x = bias_add(x, self.bias0)
 			x = self.relu(self.spade1(x, segmap))
-			x = self.conv1(x)
+			x = conv2d(x, self.conv1, [1,1,1,1], "SAME")
+			x = bias_add(x, self.bias1)
 
 			if self.learned_shortcut: 
 				skip = self.relu(self.spade_s(skip, segmap))
-				skip = self.conv_s(skip)
+				skip = conv2d(skip, self.conv_s, [1,1,1,1], "SAME")
 
 		return tf.math.add(skip, x)
 	
