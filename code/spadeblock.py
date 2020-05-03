@@ -3,7 +3,6 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.layers import BatchNormalization, LeakyReLU, Layer, ReLU
 from code.spectral_norm import spectral_conv
-from tensorflow.nn import conv2d, bias_add
 
 class SpadeBlock(Layer): 
 	def __init__(self, fin, fout, segmap_filters, use_bias=True, use_spectral=True, skip=False): 
