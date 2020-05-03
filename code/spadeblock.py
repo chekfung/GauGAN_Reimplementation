@@ -60,7 +60,7 @@ class SpadeBlock(Layer):
 
 			if self.learned_shortcut: 
 				skip = self.relu(self.spade_s(skip, segmap))
-				skip = spectral_conv(inputs=skip, weight=self.conv_s, stride=1)
+				skip = spectral_conv(inputs=skip, weight=self.conv_s, stride=1, use_bias=False)
 		else: 
 			skip = features
 			x = self.relu(self.spade0(features, segmap))
@@ -75,10 +75,3 @@ class SpadeBlock(Layer):
 				skip = tf.nn.conv2d(skip, self.conv_s, [1,1,1,1], "SAME")
 
 		return tf.math.add(skip, x)
-	
-	def shortcut(self, features, segmap): 
-		if self.learned_shortcut: 
-			x_s = self.conv_s(self.spade_s(features, segmap))
-		else: 
-			x_s = features
-		return x_s
