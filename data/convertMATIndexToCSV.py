@@ -7,14 +7,9 @@ import os
 import argparse
 import shutil
 
-parser = argparse.ArgumentParser(description='GAUGAN')
-
-parser.add_argument('--saveCSVs', type=str, default='N',
-					help='Whether to print CSV files from MATLAB index (Y or N)')
-
+# Globally accessible:
 csv_folderpath = os.path.join(sys.path[0], 'csvIndexes')
 
-args = parser.parse_args()
 
 class ADEIndex():
 
@@ -24,7 +19,10 @@ class ADEIndex():
     self.object_image_matrix = None
     self.CSVsExist = False
 
-    if os.path.exists(csv_folderpath):
+    if os.path.exists(csv_folderpath)\
+      and os.path.exists(os.path.join(csv_folderpath, 'image_index.csv'))\
+      and os.path.exists(os.path.join(csv_folderpath, 'object_name_list.csv'))\
+      and os.path.exists(os.path.join(csv_folderpath,'object_image_matrix.csv')):
 
       print("Now loading data from CSV files")
       self.image_index = pd.read_csv(os.path.join(csv_folderpath, 'image_index.csv'))
@@ -94,6 +92,10 @@ class ADEIndex():
       int_indexed_image_index = pd.concat([filename_col, folder_col, typeset_col, scene_col], axis=1)
 
       self.image_index = int_indexed_image_index.set_index('filename')
+      # Need filename col to be the index AND a query-able column
+      # (because conversion to csv makes the index just an int)
+      # self.image_index = pd.concat([self.image_index, filename_col], axis=1)
+
       # print(image_index.index)
       # print(image_index)
       # print(image_index['ADE_train_00011093.jpg'])
@@ -142,12 +144,22 @@ class ADEIndex():
     self.object_image_matrix.to_csv(os.path.join("csvIndexes","object_image_matrix.csv"))
 
 def main():
+
+  parser = argparse.ArgumentParser(description='GAUGAN')
+
+  parser.add_argument('--saveCSVs', type=str, default='N',
+          help='Whether to print CSV files from MATLAB index (Y or N)')
+
+  args = parser.parse_args()
+
+
   index = ADEIndex()
-  if args.saveCSVs == 'Y' or index.CSVsExist == False:
+  print("CSVs exist: ", index.CSVsExist)
+  if args.saveCSVs == 'Y' or (index.CSVsExist == False):
     if os.path.exists(csv_folderpath):
       shutil.rmtree(csv_folderpath)
     os.mkdir(csv_folderpath)
-    print("Now printing CSV files")
+    print("Now saving CSV files")
     index.saveALLCSVs()
     print("Your CSV files are now toasty and warm")
 

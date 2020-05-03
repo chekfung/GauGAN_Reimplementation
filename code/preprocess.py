@@ -29,6 +29,7 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
     objects_file = './data/objects_we_want.txt'
     f = open(objects_file, 'r')
     num_objects = len(f.read().split())
+
     # Function used to load and pre-process image files
     # (Have to define this ahead of time b/c Python does allow multi-line
     #    lambdas, *grumble*)
@@ -59,12 +60,15 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
         :return: a one-hot encoded segmap
         """
         # Load image
-        image = tf.io.decode_png(tf.io.read_file(file_path), channels=1) # Grayscale already, so transform to 2D grayscale array
+        # Grayscale already, so transform to 2D grayscale array
+        image = tf.io.decode_png(tf.io.read_file(file_path), channels=1) 
         image = tf.squeeze(image)
-        # Convert image to normalized float (0, 1)
-        image = tf.image.convert_image_dtype(image, tf.float32) * num_objects
-        image = tf.cast(image, tf.uint8)
+        # Charlie does not think we should be normalizing the segmaps
+        # # Convert image to normalized float (0, 1)
+        # image = tf.image.convert_image_dtype(image, tf.float32) * num_objects
+        # image = tf.cast(image, tf.uint8)
         one_hot = tf.one_hot(image, num_objects)
+        print("One hot is: ", one_hot)
 
         # Rescale data to range (-1, 1)
         #image = (image - 0.5) * 2
@@ -124,12 +128,24 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
         # image_path = 'a'
 
         # Load in image pair to return
+
+        # # The approach below doesn't work anymore because when images are saved
+        # # as segmaps, their pixel value ranges get clipped
+        # segmap = load_and_process_image(segmap_path)
+
+        
+        ## This approach fails because np.load() cannot be called on a Tensor string
+        # with tf.compat.v1.Session() as sess:
+        #     segmap = tf.convert_to_tensor(np.load(sess.run(segmap_path)))
+        # image = load_and_process_image(image_path)
+
+
         segmap = load_and_process_segmap(segmap_path)
 
-
-        #segmap = tf.convert_to_tensor(np.load(segmap_path))
         image = load_and_process_image(image_path)
 
+
+        ## For data augmentation:
         # augmented_pair = augment(image, segmap)
 
         # return augmented_pair
@@ -137,9 +153,24 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
 
     
     # RegEx to match all segmap paths
-    #seg_path = dir_name + '/*_seg.png'
+   
+    ## Approach 1: save segmaps as shrunken png files
+    ## Problem: 
+    # seg_path = dir_name + '/*_seg.png'
 
+    ## Approach 2: save segmaps as .npy files
+    ## Problem: can't call np.load() on a Tensor string
+    # seg_path = dir_name + '/*.npy'
+
+    ## Approach 3: save segmaps as csv files and load with tf
+    ## Fails because tf loads csv files by separate Tensors by column (not a unified array)
+    # seg_path = dir_name + '/*.csv'
+
+
+    # Current approach: save segmaps as png images after reassigning all object
+    # encodings 
     seg_path = dir_name + '/*.png'
+
     dataset = tf.data.Dataset.list_files(seg_path)
 
     # Shuffle order
