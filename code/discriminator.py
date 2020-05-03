@@ -2,14 +2,14 @@ import tensorflow as tf
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense, Flatten, Conv2D, BatchNormalization, LeakyReLU, Reshape, Conv2DTranspose 
 from tensorflow_addons.layers import InstanceNormalization
-from code.spectral import spectral_norm
+from code.spectral import spectral_conv
 
 
 # forward is call
 # - it is feeding input through the layers
 
 class Discriminator(Model):
-    def __init__(self, beta1=0.5, beta2=0.999, learning_rate=0.0004):
+    def __init__(self, segmap_filters, beta1=0.5, beta2=0.999, learning_rate=0.0004):
         super(Discriminator, self).__init__()
         # Padding, Stride, etc calculations
         KERNEL_SIZE = 4
@@ -21,26 +21,32 @@ class Discriminator(Model):
         self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.learning_rate, beta_1 = self.beta1, beta_2 = self.beta2)
 
         # Initial first block
-        self.conv1 = Conv2D(filters=64, kernel_size=KERNEL_SIZE, strides=2, padding="SAME")
+        self.glorot = tf.keras.initializers.GlorotNormal()
+        # filters=64, stride=2
+        self.conv1 = tf.Variable(self.glorot(shape=[KERNEL_SIZE, KERNEL_SIZE, segmap_filters+3, 64]))
+        self.bias1 = tf.Variable(self.glorot(shape=[64]))
         self.leaky1 = LeakyReLU(alpha=ALPHA_VAL)
 
         # Second block
-        self.conv2 = Conv2D(filters=128, kernel_size=KERNEL_SIZE, strides=2, padding="SAME")
+        self.conv2 = tf.Variable(self.glorot(shape=[KERNEL_SIZE, KERNEL_SIZE, 64, 128]))
+        self.bias2 = tf.Variable(self.glorot(shape=[128]))
         self.inorm1 = InstanceNormalization()
         self.leaky2 = LeakyReLU(alpha=ALPHA_VAL)
 
         # Third block
-        self.conv3 = Conv2D(filters=256, kernel_size=KERNEL_SIZE, strides=2, padding="SAME")
+        self.conv3 = tf.Variable(self.glorot(shape=[KERNEL_SIZE, KERNEL_SIZE, 128, 256]))
+        self.bias3 = tf.Variable(self.glorot(shape=[256]))
         self.inorm2 = InstanceNormalization()
         self.leaky3 = LeakyReLU(alpha=ALPHA_VAL)
 
         # Fourth block
-        self.conv4 = Conv2D(filters=512, kernel_size=KERNEL_SIZE, strides=1, padding="SAME")
+        self.conv4 = tf.Variable(self.glorot(shape=[KERNEL_SIZE, KERNEL_SIZE, 256, 512]))
+        self.bias4 = tf.Variable(self.glorot(shape=[512]))
         self.inorm3 = InstanceNormalization()
         self.leaky4 = LeakyReLU(alpha=ALPHA_VAL)
 
         # Final Convolutional Layer, as like PatchGAN implementation
-        self.conv5 = Conv2D(filters=1, kernel_size=KERNEL_SIZE, strides=1, padding="SAME")
+        self.conv5 = tf.Variable(self.glorot(shape=[KERNEL_SIZE, KERNEL_SIZE, 512, 1]))
 
         # In weird pytorch code 
         self.inorm4 = InstanceNormalization()
@@ -52,32 +58,27 @@ class Discriminator(Model):
         x = tf.concat([segmaps, inputs], axis=-1)
         
         # First layer
-        x = self.conv1(x)
-        x = spectral_norm(x)
+        x = spectral_conv(inputs=x, weight=self.conv1, stride=2, bias=self.bias1)
         x = self.leaky1(x)
 
         # Second Layer
-        x = self.conv2(x)
-        x = spectral_norm(x)
+        x = spectral_conv(inputs=x, weight=self.conv2, stride=2, bias=self.bias2)
         x = self.inorm1(x)
         x = self.leaky2(x)
 
         # Third Layer
-        x = self.conv3(x)
-        x = spectral_norm(x)
+        x = spectral_conv(inputs=x, weight=self.conv3, stride=2, bias=self.bias3)
         x = self.inorm2(x)
         x = self.leaky3(x)
 
         # Fourth layer
-        x = self.conv4(x)
-        x = spectral_norm(x)
+        x = spectral_conv(inputs=x, weight=self.conv4, stride=2, bias=self.bias4)
         x = self.inorm3(x)
         x = self.leaky4(x)
 
         # Final layer
-        x = self.leaky5(self.inorm4(x))
-        x = self.conv5(x)
-        x = spectral_norm(x)
+        #x = self.leaky5(self.inorm4(x))
+        x = spectral_conv(inputs=x, weight=self.conv5, stride=1, bias=self.bias5)
 
         return x
 

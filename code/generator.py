@@ -6,8 +6,8 @@ from code.spectral import spectral_conv
 from code.vgg import VGG_Loss
 
 class SPADEGenerator(tf.keras.Model):
-    def __init__(self, beta1=0.5, beta2=0.999, learning_rate=0.0001, batch_size=16, z_dim=64, \
-        img_w=128, img_h=96, lambda_vgg=10, segmap_filters):
+    def __init__(self, segmap_filters, beta1=0.5, beta2=0.999, learning_rate=0.0001, batch_size=16, z_dim=64, \
+        img_w=128, img_h=96, lambda_vgg=10):
         super(SPADEGenerator, self).__init__()
         
         self.beta1 = beta1
@@ -24,7 +24,7 @@ class SPADEGenerator(tf.keras.Model):
 
         self.sw, self.sh = self.compute_latent_vector_size()
         self.fc = tf.Variable(self.glorot(shape=[3,3,segmap_filters,16*z_dim]))
-        Conv2D(16 * z_dim, kernel_size=3, strides=1, padding="SAME", use_bias=True, dtype=tf.float32)
+        self.fc_bias = tf.Variable(self.glorot(shape=[16*z_dim]))
 
         # Not sure what this is for
         #self.dense = tf.keras.layers.Dense(self.sh*self.sw*self.num_channels, dtype=tf.float32)
@@ -46,6 +46,7 @@ class SPADEGenerator(tf.keras.Model):
 
         # filters=3, kernel=3, strides=1
         self.conv_layer = tf.Variable(self.glorot(shape=[3,3,nf,3]))
+        self.conv_bias = tf.Variable(self.glorot(shape=[3]))
 
         # Unsample layer by 2
         self.upsample = UpSampling2D()
@@ -61,7 +62,7 @@ class SPADEGenerator(tf.keras.Model):
 
         # Conv2D based off seg map noise
         result = tf.image.resize(segs, size=(self.sh, self.sw), method="nearest")
-        result = spectral_norm(self.fc(result))
+        result = spectral_conv(inputs=result, weight=self.fc, stride=1, bias=self.fc_bias)
 
         # Dense Random Noise
         #result = self.dense(noise)
@@ -90,7 +91,7 @@ class SPADEGenerator(tf.keras.Model):
 
         # Take activation function plus final convolution layer in generator
         result = self.lrelu(result)
-        result = spectral_norm(self.conv_layer(result))
+        result = spectral_conv(inputs=result, weight=self.conv_layer, stride=1, bias=self.conv_bias)
 
         return result
     

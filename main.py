@@ -77,6 +77,9 @@ parser.add_argument('--img-h', type=int, default=96,
 parser.add_argument('--img-w', type=int, default=128,
 					help='width of image')
 
+parser.add_argument('--segmap-filters', type=int, default=18,
+					help='number of filters in the segmap one hot encoding')
+
 parser.add_argument('--lambda-vgg', type=float, default=0,
 					help='weight of vgg loss in generator')
 
@@ -281,9 +284,9 @@ def main():
 		n_threads=args.num_data_threads, drop_remainder=False)
 
 	# Initialize generator and discriminator models
-	generator = SPADEGenerator(args.beta1, args.beta2, args.gen_learn_rate, \
+	generator = SPADEGenerator(args.segmap_filters, args.beta1, args.beta2, args.gen_learn_rate, \
 		args.batch_size, args.z_dim, args.img_w, args.img_h, args.lambda_vgg)
-	discriminator = Discriminator(args.beta1, args.beta2, args.dsc_learn_rate)
+	discriminator = Discriminator(args.segmap_filters, args.beta1, args.beta2, args.dsc_learn_rate)
 
 	print('========================== GENERATOR ==========================')
 	# Charlie arbitrarily put 4x4 for the input dims just to see if the code would run
