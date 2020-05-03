@@ -1,3 +1,5 @@
+import sys
+print(sys.path)
 import tensorflow as tf
 import tensorflow_gan as tfgan
 import tensorflow_hub as hub
