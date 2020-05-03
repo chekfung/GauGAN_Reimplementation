@@ -2,7 +2,7 @@ from code.spadelayer import SpadeLayer
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.layers import BatchNormalization, LeakyReLU, Layer, ReLU
-from code.spectral import spectral_conv
+from code.spectral_norm import spectral_conv
 from tensorflow.nn import conv2d, bias_add
 
 class SpadeBlock(Layer): 

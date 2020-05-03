@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 from code.spadeblock import SpadeBlock
 from tensorflow.keras.layers import UpSampling2D, LeakyReLU, Conv2D, Dense
-from code.spectral import spectral_conv
+from code.spectral_norm import spectral_conv
 from code.vgg import VGG_Loss
 
 class SPADEGenerator(tf.keras.Model):
