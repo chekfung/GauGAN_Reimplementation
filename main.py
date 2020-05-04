@@ -62,10 +62,10 @@ parser.add_argument('--num-epochs', type=int, default=200,
 parser.add_argument('--gen-learn-rate', type=float, default=0.0001,
 					help='Learning rate for Generator Adam optimizer')
 
-parser.add_argument('--dsc-learn-rate', type=float, default=0.0005,
+parser.add_argument('--dsc-learn-rate', type=float, default=0.0004,
 					help='Learning rate for Discriminator Adam optimizer')
 
-parser.add_argument('--beta1', type=float, default=0,
+parser.add_argument('--beta1', type=float, default=0.5,
 					help='"beta1" parameter for Adam optimizer')
 
 parser.add_argument('--beta2', type=float, default=0.999,
@@ -80,13 +80,13 @@ parser.add_argument('--img-w', type=int, default=128,
 parser.add_argument('--segmap-filters', type=int, default=19,
 					help='number of filters in the segmap one hot encoding')
 
-parser.add_argument('--lambda-vgg', type=float, default=0.1,
+parser.add_argument('--lambda-vgg', type=float, default=10,
 					help='weight of vgg loss in generator')
 
 parser.add_argument('--log-every', type=int, default=7,
 					help='Print losses after every [this many] training iterations')
 
-parser.add_argument('--save-every', type=int, default=5,
+parser.add_argument('--save-every', type=int, default=10,
 					help='Save the state of the network after every [this many] epochs iterations')
 
 parser.add_argument('--device', type=str, default='GPU:0' if gpu_available else 'CPU:0',
@@ -240,36 +240,41 @@ def test(generator, dataset_iterator):
 	:return: None
 	"""
 	print("Start Testing")
-	total_fid = 0
-	total_gen_loss = 0
-	total_disc_loss = 0
-	iterations = 0
+	total_fid = []
 
 	for iteration, batch in enumerate(dataset_iterator):
 		noise = tf.random.uniform((args.batch_size, 256), minval=-1, maxval=1)
 		image, seg_map = batch
-		img = generator.call(noise, seg_map).numpy()
-
-		# Rescale the image from (-1, 1) to (0, 255)
-		img = img * 255
-
-		if iteration == 1:
-			print(img)
+		print(image.shape)
+		gen = generator.call(noise, seg_map)
+		print(gen.shape)
 
 		# Convert to uint8
-		#img = img.astype(np.uint8)
-		img_i = img[0]
+		img_i = gen[0] * 255
+		img_2 = gen[1] * 255
+
 		# Save images to disk
-		#img_i = img_as_ubyte(img[0])
 		s = args.out_dir+'/'+str(iteration)+'_generated.png'
 		s2 = args.out_dir+'/'+str(iteration)+'_truth.png'
-		s3 = args.out_dir+'/'+str(iteration)+'_segmap.png'
-		imwrite(s, img_i)
+
+		gener_path = args.out_dir+'/'+str(iteration)+'(second)_generated.png'
+		truth_path = args.out_dir+'/'+str(iteration)+'(second)_truth.png'
+
+		imsave(s, img_i)
 		imsave(s2, image[0])
 
-		iterations += 1
+		imsave(gener_path, img_2)
+		imsave(truth_path, image[1])
 
-	return total_fid / iterations, total_gen_loss / iterations, total_disc_loss / iterations
+		# Calculate the FID for this batch
+		fid = fid_function(image, gen)
+		total_fid.append(fid)
+	
+	# Get the Average FID across all images
+	avg_fid = sum(total_fid) / len(total_fid)
+
+	print("Testing Average FID: ", avg_fid)
+	return total_fid, avg_fid
 
 ## --------------------------------------------------------------------------------------
 
@@ -280,7 +285,7 @@ def main():
 		n_threads=args.num_data_threads)
 
 	# Get number of train images and make an iterator over it
-	test_dataset_iterator = load_image_batch(dir_name=args.test_img_dir, batch_size=1, \
+	test_dataset_iterator = load_image_batch(dir_name=args.test_img_dir, batch_size=2, \
 		n_threads=args.num_data_threads, drop_remainder=False)
 
 	# Initialize generator and discriminator models
@@ -315,7 +320,6 @@ def main():
 
 	if args.restore_checkpoint or args.mode == 'test':
 		# restores the latest checkpoint using from the manager
-		print("MOO")
 		checkpoint.restore(manager.latest_checkpoint)
 
 	try:
@@ -361,24 +365,21 @@ def main():
 							csvwritter.writerow([epoch, float(avg_fid), float(avg_g_loss), float(avg_d_loss)])
 
 			if args.mode == 'test':
-				avg_fid, avg_g_loss, avg_d_loss = test(generator, test_dataset_iterator)
+				tot_fid = test(generator, test_dataset_iterator)
 
 				# Save the losses and fid into a CSV that we make.
 				logs_path = "logs"
-				fn = "fid_losses_test.csv"
+				fn = "fid_losses_test.txt"
 				full_path = logs_path + '/' + fn
 
 				# Make logs directory if it does not exist
 				if (not os.path.exists(logs_path)):
 					os.mkdir(logs_path)
-
-				# If first Epoch create new file
-				with open(full_path, 'w') as csvfile:
-					csvwriter = csv.writer(csvfile)
-
-					# Write the categories and first epoch info
-					csvwriter.writerow(['Average FID', 'Average Generator Loss', 'Average Discriminator Loss'])
-					csvwriter.writerow([avg_fid, avg_g_loss, avg_d_loss])
+				
+				with open(full_path, 'w') as writer:
+					for fid in tot_fid:
+						string = "Image FID: " + str(float(fid)) + "\n" 
+						writer.write(string)
 
 	except RuntimeError as e:
 		print(e)
