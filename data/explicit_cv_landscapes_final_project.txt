@@ -8,14 +8,16 @@ chaparral
 cliff
 coast
 creek
-desert
+desert/vegetation
+desert/sand
 ditch
 escarpment
 estuary
 field/wild
 field/cultivated
 fjord
-forest
+forest/broadleaf
+forest/needleleaf
 glacier
 glade
 gorge
@@ -45,6 +47,7 @@ outliers/arcipelago
 outliers/wetland
 pond
 rainforest
+rock_arch
 river
 salt_plain
 sandbar
@@ -59,7 +62,10 @@ tree_farm
 trench
 valley
 volcano
-waterfall
+waterfall/block
+waterfall/cascade
+waterfall/cataract
+waterfall/fan
 woodland
 
 

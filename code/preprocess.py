@@ -28,7 +28,9 @@ def load_image_batch(dir_name, batch_size=32, shuffle_buffer_size=25, n_threads=
     """
     objects_file = './data/objects_we_want.txt'
     f = open(objects_file, 'r')
-    num_objects = len(f.read().split())
+
+    # Add plus one due to the zero that represents the all other objects
+    num_objects = len(f.read().split('\n')) + 1
 
     # Function used to load and pre-process image files
     # (Have to define this ahead of time b/c Python does allow multi-line

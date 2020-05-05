@@ -1,19 +1,60 @@
 grass 
+weeds
 sea
 field
+field desert 
+field flowers 
+field grass
+ice field 
+cloud
 clouds
 fog
 hill
+hill grass 
+hills 
+hillside 
 mountain
+cliff
+bush
+bushes
+mountain ledge 
+mountain pass 
+snowy mountain pass
+ice mountain
+ice floe
+iceberg
 river
 rock
+boulder
+plant
+rock formations
+rocks
+rocky formation 
+rocky formations
 snow
 stone
 water
+marsh water
+pond water
+sea water ice
+waterfall
+bog water
+soil
+island
 dirt
+stick
 gravel
 tree
+trees
 sand
+sand hill 
+sand dune
+sandbar
 earth
+ground
+land
 sky
-sand
+sun
+forest
+palm
+palm trees 

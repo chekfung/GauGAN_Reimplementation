@@ -50,7 +50,7 @@ parser.add_argument('--restore-checkpoint', action='store_true',
 parser.add_argument('--z-dim', type=int, default=64,
 					help='Dimensionality of the latent space')
 
-parser.add_argument('--batch-size', type=int, default=16,
+parser.add_argument('--batch-size', type=int, default=8,
 					help='Sizes of image batches fed through the network')
 
 parser.add_argument('--num-data-threads', type=int, default=8,
@@ -77,7 +77,7 @@ parser.add_argument('--img-h', type=int, default=96,
 parser.add_argument('--img-w', type=int, default=128,
 					help='width of image')
 
-parser.add_argument('--segmap-filters', type=int, default=19,
+parser.add_argument('--segmap-filters', type=int, default=61,
 					help='number of filters in the segmap one hot encoding')
 
 parser.add_argument('--lambda-vgg', type=float, default=10,
