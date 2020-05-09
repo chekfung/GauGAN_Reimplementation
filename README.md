@@ -15,7 +15,7 @@ from the dataset as follows:
 
 
 Changes Made: 
-- Shrank image sizes to 40x30
-- Reduced the number of spade layers in Generator
+- Shrank image sizes to 128x96
+- Reduced the number of upsampling layers in the generator from 7 to 5 
 - Reduced z-dimension to 64
-- 
+- We specifically do not include the encoder in our generator. It is in the code, but not used.
