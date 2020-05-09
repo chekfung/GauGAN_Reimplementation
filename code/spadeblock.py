@@ -1,10 +1,11 @@
 from code.spadelayer import SpadeLayer
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras.layers import Conv2D, BatchNormalization, LeakyReLU, Layer, ReLU
+from tensorflow.keras.layers import BatchNormalization, LeakyReLU, Layer, ReLU
+from code.spectral_norm import spectral_conv
 
 class SpadeBlock(Layer): 
-	def __init__(self, fin, fout, use_bias=True, use_spectral=False, skip=False): 
+	def __init__(self, fin, fout, segmap_filters, use_bias=True, use_spectral=True, skip=False): 
 		super(SpadeBlock, self).__init__()
 		#self.use_spectral = use_spectral 
 
@@ -22,21 +23,26 @@ class SpadeBlock(Layer):
 		self.spade2 = SpadeLayer(k)
 		self.conv2 = Conv2D(k, kernel_size=3, padding="SAME", use_bias=use_bias, dtype=tf.float32)
 		self.relu = ReLU() """
-
+		self.use_spectral = use_spectral
 		self.learned_shortcut = (fin != fout)
 		fmiddle = min(fin, fout)
+		self.glorot = tf.keras.initializers.GlorotNormal()
 		
-		self.conv0 = Conv2D(filters=fmiddle, kernel_size=3, strides=1, padding="SAME", use_bias=use_bias, dtype=tf.float32)
-		self.conv1 = Conv2D(filters=fout, kernel_size=3, strides=1, padding="SAME", use_bias=use_bias, dtype=tf.float32)
-		#self.conv_s = Conv2D(filters=fout, kernel_size=1, strides=1, padding="SAME", use_bias=False) # comment
+		# filters out = fmiddle, kernel=3, strides=1
+		self.conv0 = tf.Variable(self.glorot(shape=[3,3,fin,fmiddle]))
+		self.bias0 = tf.Variable(self.glorot(shape=[fmiddle]))
+		# filters out = fout, kernel=3, strides=1
+		self.conv1 = tf.Variable(self.glorot(shape=[3,3,fmiddle,fout]))
+		self.bias1 = tf.Variable(self.glorot(shape=[fout]))
+		# filters out = fout, kernel=1, strides=1
 		if self.learned_shortcut: 
-			self.conv_s = Conv2D(filters=fout, kernel_size=1, strides=1, padding="SAME", use_bias=False, dtype=tf.float32)
-		
-		self.spade0 = SpadeLayer(out_channels=fin)
-		self.spade1 = SpadeLayer(out_channels=fmiddle)
+			self.conv_s = tf.Variable(self.glorot(shape=[1,1,fin,fout]))
+
+		self.spade0 = SpadeLayer(in_channels=segmap_filters, out_channels=fin)
+		self.spade1 = SpadeLayer(in_channels=segmap_filters, out_channels=fmiddle)
 		#self.spade_s = SpadeLayer(out_channels=fin) #comment 
 		if self.learned_shortcut: 
-			self.spade_s = SpadeLayer(out_channels=fin)
+			self.spade_s = SpadeLayer(in_channels=segmap_filters, out_channels=fin)
 		self.relu = ReLU()
 
 	def call(self, features, segmap): 
@@ -45,75 +51,27 @@ class SpadeBlock(Layer):
 		dx = self.conv0(self.lrelu1(self.spade0(features, segmap)))
 		dx = self.conv1(self.lrelu2(self.spade1(dx, segmap)))
 		out = tf.math.add(skip_features, dx) """
-		skip = features
-		x = self.relu(self.spade0(features, segmap))
-		x = self.conv0(x)
-		x = self.relu(self.spade1(x, segmap))
-		x = self.conv1(x)
+		if self.use_spectral: 
+			skip = features
+			x = self.relu(self.spade0(features, segmap))
+			x = spectral_conv(inputs=x, weight=self.conv0, stride=1, bias=self.bias0)
+			x = self.relu(self.spade1(x, segmap))
+			x = spectral_conv(inputs=x, weight=self.conv1, stride=1, bias=self.bias1)
 
-		if self.learned_shortcut: 
-			skip = self.relu(self.spade_s(skip, segmap))
-			skip = self.conv_s(skip)
+			if self.learned_shortcut: 
+				skip = self.relu(self.spade_s(skip, segmap))
+				skip = spectral_conv(inputs=skip, weight=self.conv_s, stride=1, use_bias=False)
+		else: 
+			skip = features
+			x = self.relu(self.spade0(features, segmap))
+			x = tf.nn.conv2d(x, self.conv0, [1,1,1,1], "SAME")
+			x = tf.nn.bias_add(x, self.bias0)
+			x = self.relu(self.spade1(x, segmap))
+			x = tf.nn.conv2d(x, self.conv1, [1,1,1,1], "SAME")
+			x = tf.nn.bias_add(x, self.bias1)
+
+			if self.learned_shortcut: 
+				skip = self.relu(self.spade_s(skip, segmap))
+				skip = tf.nn.conv2d(skip, self.conv_s, [1,1,1,1], "SAME")
 
 		return tf.math.add(skip, x)
-
-
-		#out = dx
-		""" if self.use_spectral: 
-			skip_features = self.spectral_norm(w=self.shortcut(features, segmap))
-			dx = self.spectral_norm(w=self.conv0(self.actvn(self.spade0(features, segmap))))
-			dx = self.spectral_norm(w=self.conv1(self.actvn(self.spade1(dx, segmap))))
-			out = tf.math.add(skip_features, dx)
-		else: 
-			skip_features = self.shortcut(features, segmap)
-			dx = self.conv0(self.actvn(self.spade0(features, segmap)))
-			dx = self.conv1(self.actvn(self.spade1(dx, segmap)))
-			out = tf.math.add(skip_features, dx) """
-		return out
-
-	# def build(self, input_shape): 
-	# 	super(SpadeBlock, self).build(input_shape)
-	
-	def shortcut(self, features, segmap): 
-		if self.learned_shortcut: 
-			x_s = self.conv_s(self.spade_s(features, segmap))
-		else: 
-			x_s = features
-		return x_s
-	
-	def actvn(self, x): 
-		return LeakyReLU(x, alpha=0.2)
-
-	"""
-	This spectral_norm implementation was taken from https://github.com/taki0112/Spectral_Normalization-Tensorflow
-	"""
-	# def spectral_norm(self, w, iteration=1):
-	# 	w_shape = w.shape.as_list()
-	# 	w = tf.reshape(w, [-1, w_shape[-1]])
-
-	# 	u = tf.get_variable("u", [1, w_shape[-1]], initializer=tf.random_normal_initializer(), trainable=False)
-
-	# 	u_hat = u
-	# 	v_hat = None
-	# 	for i in range(iteration):
-	# 		"""
-	# 		power iteration
-	# 		Usually iteration = 1 will be enough
-	# 		"""
-	# 		v_ = tf.matmul(u_hat, tf.transpose(w))
-	# 		v_hat = tf.nn.l2_normalize(v_)
-
-	# 		u_ = tf.matmul(v_hat, w)
-	# 		u_hat = tf.nn.l2_normalize(u_)
-
-	# 	u_hat = tf.stop_gradient(u_hat)
-	# 	v_hat = tf.stop_gradient(v_hat)
-
-	# 	sigma = tf.matmul(tf.matmul(v_hat, w), tf.transpose(u_hat))
-
-	# 	with tf.control_dependencies([u.assign(u_hat)]):
-	# 		w_norm = tf.math.divide(w, sigma)
-	# 		w_norm = tf.reshape(w_norm, w_shape)
-
-
-	# 	return w_norm

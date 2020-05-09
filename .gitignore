@@ -10,6 +10,7 @@ data/.*
 
 # Ignore checkpoints for right now
 checkpoints/*
+presentation/*
 
 ._.DS_Store
 .DS_Store
@@ -17,6 +18,7 @@ checkpoints/*
 fullDataSet.zip
 *.png
 *.jpg
+*.npy
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

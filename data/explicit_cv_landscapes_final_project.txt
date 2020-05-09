@@ -1,25 +1,23 @@
-bamboo_forest
 badlands
 bayou
 beach
 bog
-butte
 canyon
 canal/natural
-cavern/outdoor
 chaparral
 cliff
 coast
 creek
-desert
+desert/vegetation
+desert/sand
 ditch
-dolmen
 escarpment
 estuary
 field/wild
 field/cultivated
 fjord
-forest
+forest/broadleaf
+forest/needleleaf
 glacier
 glade
 gorge
@@ -48,8 +46,8 @@ orchard
 outliers/arcipelago
 outliers/wetland
 pond
-picnic_area
 rainforest
+rock_arch
 river
 salt_plain
 sandbar
@@ -64,7 +62,10 @@ tree_farm
 trench
 valley
 volcano
-waterfall
+waterfall/block
+waterfall/cascade
+waterfall/cataract
+waterfall/fan
 woodland
 
 

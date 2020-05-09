@@ -1,11 +1,13 @@
 import numpy as np
 import tensorflow as tf
 from code.spadeblock import SpadeBlock
-from tensorflow.keras.layers import UpSampling2D, LeakyReLU, Conv2D
+from tensorflow.keras.layers import UpSampling2D, LeakyReLU, Conv2D, Dense
+from code.spectral_norm import spectral_conv
+from code.vgg import VGG_Loss
 
 class SPADEGenerator(tf.keras.Model):
-    def __init__(self, beta1=0.5, beta2=0.999, learning_rate=0.0001, batch_size=16, z_dim=64, \
-        img_w=128, img_h=96):
+    def __init__(self, segmap_filters, beta1=0.5, beta2=0.999, learning_rate=0.0001, batch_size=16, z_dim=64, \
+        img_w=128, img_h=96, lambda_vgg=10):
         super(SPADEGenerator, self).__init__()
         
         self.beta1 = beta1
@@ -17,25 +19,34 @@ class SPADEGenerator(tf.keras.Model):
         self.upsample_count = 5
         self.img_w = img_w
         self.img_h = img_h
+        self.lambda_vgg = lambda_vgg
+        self.glorot = tf.keras.initializers.GlorotNormal()
 
         self.sw, self.sh = self.compute_latent_vector_size()
-        self.fc = Conv2D(16 * z_dim, kernel_size=3, strides=1, padding="SAME", use_bias=True, dtype=tf.float32)
+        self.fc = tf.Variable(self.glorot(shape=[3,3,segmap_filters,16*z_dim]))
+        self.fc_bias = tf.Variable(self.glorot(shape=[16*z_dim]))
+
+        # Not sure what this is for
         #self.dense = tf.keras.layers.Dense(self.sh*self.sw*self.num_channels, dtype=tf.float32)
         #self.dense = tf.keras.layers.Dense(16384)
 
         # For now, I just make this NF like the code
         nf = z_dim
+        self.z_dim = z_dim
 
         # SPADE LAYERS
-        self.spade_layers0 = SpadeBlock(16 * nf, 16 * nf)
-        self.spade_layers1 = SpadeBlock(16 * nf, 16 * nf)
-        self.spade_layers2 = SpadeBlock(16 * nf, 16 * nf)
-        self.spade_layers3 = SpadeBlock(16 * nf, 8 * nf)
-        self.spade_layers4 = SpadeBlock(8 * nf, 4 * nf)
-        self.spade_layers5 = SpadeBlock(4 * nf, 2 * nf)
-        self.spade_layers6 = SpadeBlock(2 * nf, 1 * nf)
+        self.dense = Dense(z_dim * 16 * self.sw * self.sh)
+        self.spade_layers0 = SpadeBlock(16 * nf, 16 * nf, segmap_filters)
+        self.spade_layers1 = SpadeBlock(16 * nf, 16 * nf, segmap_filters)
+        self.spade_layers2 = SpadeBlock(16 * nf, 16 * nf, segmap_filters)
+        self.spade_layers3 = SpadeBlock(16 * nf, 8 * nf, segmap_filters)
+        self.spade_layers4 = SpadeBlock(8 * nf, 4 * nf, segmap_filters)
+        self.spade_layers5 = SpadeBlock(4 * nf, 2 * nf, segmap_filters)
+        self.spade_layers6 = SpadeBlock(2 * nf, 1 * nf, segmap_filters)
 
-        self.conv_layer = tf.keras.layers.Conv2D(3, (3,3), padding="SAME", activation='tanh', dtype=tf.float32)
+        # filters=3, kernel=3, strides=1
+        self.conv_layer = tf.Variable(self.glorot(shape=[3,3,nf,3]))
+        self.conv_bias = tf.Variable(self.glorot(shape=[3]))
 
         # Unsample layer by 2
         self.upsample = UpSampling2D()
@@ -43,18 +54,24 @@ class SPADEGenerator(tf.keras.Model):
 
         self.lrelu = LeakyReLU(alpha=0.2)
         self.bce = tf.keras.losses.BinaryCrossentropy()
+        self.vgg_loss_obj = VGG_Loss()
     
-    def call(self, segs):
-        #result_dense = self.dense(noise)
+    def call(self, noise, segs):
         #reshaped = tf.reshape(result_dense, [-1, self.image_width, self.image_height, self.num_channels])
         #reshaped = tf.reshape(result_dense, [segs.shape[0], -1, 4, 4])
+
+        # Conv2D based off seg map noise
         result = tf.image.resize(segs, size=(self.sh, self.sw), method="nearest")
-        result = self.fc(result)
+        result = spectral_conv(inputs=result, weight=self.fc, stride=1, bias=self.fc_bias)
+
+        # Dense Random Noise
+        #result = self.dense(noise)
+        #result = tf.reshape(result, [self.batch_size, self.sh, self.sw, 16 * self.z_dim])
 
         # Start doing spade layers
         result = self.spade_layers0(result, segs)
         result = self.upsample(result)
-        
+
         # Middle layers
         result = self.spade_layers1(result, segs)
         result = self.spade_layers2(result, segs)
@@ -74,7 +91,7 @@ class SPADEGenerator(tf.keras.Model):
 
         # Take activation function plus final convolution layer in generator
         result = self.lrelu(result)
-        result = self.conv_layer(result)
+        result = spectral_conv(inputs=result, weight=self.conv_layer, stride=1, bias=self.conv_bias)
 
         return result
     
@@ -91,7 +108,11 @@ class SPADEGenerator(tf.keras.Model):
         return sw, sh
 
     
-    def loss(self,fake_logits):
+    def loss(self, fake_logits, fake_image, real_image):
         # Only hinge loss for now--can add extra losses later
-        #return tf.keras.losses.hinge(tf.zeros_like(fake_logits), fake_logits)
-        return self.bce(tf.ones_like(fake_logits), fake_logits)
+        hinge_loss = tf.reduce_mean(tf.keras.losses.hinge(tf.zeros_like(fake_logits), fake_logits))
+        #return self.bce(tf.ones_like(fake_logits), fake_logits)
+        #return -tf.reduce_mean(fake_logits)
+        #adversarial_loss = tf.math.multiply(0.5,tf.reduce_mean((fake_logits - 1)**2)) # Using Least squares loss
+        vgg_loss = tf.math.multiply(self.vgg_loss_obj(fake_image, real_image), self.lambda_vgg)
+        return tf.math.divide(tf.math.add(hinge_loss, vgg_loss), 2)
