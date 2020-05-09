@@ -192,7 +192,6 @@ def train(generator, discriminator, dataset_iterator, manager):
 			total_gen_loss += g_loss
 			total_disc_loss += d_loss
 
-			# FIXME: For testing purposes to see what generated output looks like
 			global EPOCH_COUNT
 			if iteration == 0:
 				s = "logs/generated_samples"+'/'+str(EPOCH_COUNT)+'.png'
@@ -239,32 +238,32 @@ def test(generator, dataset_iterator):
 	:param generator: generator model
 	:return: None
 	"""
-	print("Start Testing")
 	total_fid = []
+	image_num = 0
 
 	for iteration, batch in enumerate(dataset_iterator):
 		noise = tf.random.uniform((args.batch_size, 256), minval=-1, maxval=1)
 		image, seg_map = batch
-		print(image.shape)
 		gen = generator.call(noise, seg_map)
-		print(gen.shape)
 
 		# Convert to uint8
 		img_i = gen[0] * 255
 		img_2 = gen[1] * 255
 
 		# Save images to disk
-		s = args.out_dir+'/'+str(iteration)+'_generated.png'
-		s2 = args.out_dir+'/'+str(iteration)+'_truth.png'
+		gener_path1 = args.out_dir+'/'+str(image_num)+'_generated.png'
+		truth_path1 = args.out_dir+'/'+str(image_num)+'_truth.png'
+		image_num += 1
 
-		gener_path = args.out_dir+'/'+str(iteration)+'(second)_generated.png'
-		truth_path = args.out_dir+'/'+str(iteration)+'(second)_truth.png'
+		gener_path2 = args.out_dir+'/'+str(image_num)+'_generated.png'
+		truth_path2 = args.out_dir+'/'+str(image_num)+'_truth.png'
+		image_num += 1
 
-		imsave(s, img_i)
-		imsave(s2, image[0])
+		imsave(gener_path1, img_i)
+		imsave(truth_path1, image[0])
 
-		imsave(gener_path, img_2)
-		imsave(truth_path, image[1])
+		imsave(gener_path2, img_2)
+		imsave(truth_path2, image[1])
 
 		# Calculate the FID for this batch
 		fid = fid_function(image, gen)
@@ -273,7 +272,6 @@ def test(generator, dataset_iterator):
 	# Get the Average FID across all images
 	avg_fid = sum(total_fid) / len(total_fid)
 
-	print("Testing Average FID: ", avg_fid)
 	return total_fid, avg_fid
 
 ## --------------------------------------------------------------------------------------
@@ -287,27 +285,15 @@ def main():
 	# Get number of train images and make an iterator over it
 	test_dataset_iterator = load_image_batch(dir_name=args.test_img_dir, batch_size=2, \
 		n_threads=args.num_data_threads, drop_remainder=False)
+	
+	print("Dataset loaded into the model")
 
 	# Initialize generator and discriminator models
 	generator = SPADEGenerator(args.segmap_filters, args.beta1, args.beta2, args.gen_learn_rate, \
 		args.batch_size, args.z_dim, args.img_w, args.img_h, args.lambda_vgg)
 	discriminator = Discriminator(args.segmap_filters, args.beta1, args.beta2, args.dsc_learn_rate)
 
-	print('========================== GENERATOR ==========================')
-	# Charlie arbitrarily put 4x4 for the input dims just to see if the code would run
-	# Error message:
-	''''
-	  File "/gpfs/main/home/cgagnon1/course/cs1430/gaugan/James_TompGAN/code/generator.py", line 34, in call
-    result_dense = self.dense(noise)
-
-    ValueError: Input 0 of layer dense is incompatible with the layer:
-    : expected min_ndim=2, found ndim=1. Full shape received: [2]
-
-	'''
-	# generator.build(input_shape=(4,4))
-	# generator.summary()
-	print('========================== DISCRIMINATOR ==========================')
-	# discriminator.summary()
+	print("Generator and Discriminator have been created")
 
 	# For saving/loading models
 	checkpoint_dir = './checkpoints'
@@ -365,7 +351,9 @@ def main():
 							csvwritter.writerow([epoch, float(avg_fid), float(avg_g_loss), float(avg_d_loss)])
 
 			if args.mode == 'test':
-				tot_fid = test(generator, test_dataset_iterator)
+				print("Start Testing")
+				tot_fid, avg_fid = test(generator, test_dataset_iterator)
+				print("Testing Average FID: ", avg_fid)
 
 				# Save the losses and fid into a CSV that we make.
 				logs_path = "logs"

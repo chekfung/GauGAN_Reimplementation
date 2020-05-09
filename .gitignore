@@ -10,6 +10,7 @@ data/.*
 
 # Ignore checkpoints for right now
 checkpoints/*
+presentation/*
 
 ._.DS_Store
 .DS_Store
