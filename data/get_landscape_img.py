@@ -184,8 +184,8 @@ def make_save_dir(file_dir):
     # Return the names of the directories made
     return train, test
 
-def remove_parts_two(dir):
-    dir = dir + '/*_parts_2.png'
+def remove_parts_one_and_two(dir):
+    dir = dir + '/*parts*.png'
     lst = glob.glob(dir)
 
     for item in lst:
@@ -361,10 +361,12 @@ def main():
         for seg in segs:
             save_shrunken_segmap(seg, object_names, train_dir, test_dir, whether_training=False)
 
-    # Remove parts2 files (necessary for explicit scene selection)
+    # Remove parts1 and parts2 files (because these are not considered
+        # --> preprocessing.py only takes in the full segmap that corresponds
+        #     to each image)
 
-    remove_parts_two(test_dir)
-    remove_parts_two(train_dir)
+    remove_parts_one_and_two(test_dir)
+    remove_parts_one_and_two(train_dir)
 
     print("Done loading resized Testing data selected explicitly by scene")
 
