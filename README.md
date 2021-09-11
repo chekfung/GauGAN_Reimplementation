@@ -1,4 +1,4 @@
-# James_TompGAN
+# GauGAN Reimplementation
 
 ## Implementation of [NVIDIA's SPADE Normalization Layer](https://nvlabs.github.io/SPADE/) for the Pix2Pix GAN
 
